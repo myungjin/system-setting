@@ -76,7 +76,24 @@
    (cpp-mode . lsp)))
 
 (use-package lsp-ui
-  :commands lsp-ui-mode)
+    :config
+  (defun lee/lsp-ui-setup ()
+    (setq lsp-ui-sideline-show-hover nil
+          lsp-ui-sideline-enable nil
+          lsp-ui-sideline-delay 0.5
+          lsp-ui-sideline-ignore-duplicate t
+          lsp-ui-flycheck-live-reporting nil
+          lsp-ui-doc-delay 5
+          lsp-eldoc-enable-hover t
+          lsp-signature-doc-lines 2
+          lsp-signature-auto-activate t
+          lsp-ui-doc-position 'bottom
+          lsp-ui-doc-alignment 'frame
+          lsp-ui-doc-header nil
+          lsp-ui-doc-include-signature t
+          lsp-ui-doc-use-childframe nil))
+  :commands lsp-ui-mode
+`  :hook ((lsp-before-initialize . lee/lsp-ui-setup)))
 
 ;; client for c/c++ language server
 (use-package ccls
