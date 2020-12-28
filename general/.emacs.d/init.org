@@ -6,7 +6,7 @@
 * Preamble
 This is an Emacs configuration file that I use in my system. Many of them are
 collected from various sources in the Internet. One key source is from
-[[[[https://github.com/daviwil/emacs-from-scratch/blob/master/Emacs.org]]][Emacs From Scratch Configuration]].
+[[https://github.com/daviwil/emacs-from-scratch/blob/master/Emacs.org][Emacs From Scratch Configuration]].
 To tangle this init.org file and generate init.el file, run =M-x org-babel-tangel=
 or =C-c C-v t= in Emacs. 
 
