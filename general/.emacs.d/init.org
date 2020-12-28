@@ -90,13 +90,39 @@ This section configures the basic UI settings for Emacs.
 #+end_src
 
 
-** Color Theme
+** Advanced UI configuration
+*** Color Theme
 #+begin_src emacs-lisp
 
 (use-package doom-themes
   :init (load-theme 'doom-acario-dark t))
+#+end_src
+
+*** Better Modeline
+#+begin_src emacs-lisp
+
+(use-package all-the-icons)
+
+(use-package doom-modeline
+  :init (doom-modeline-mode 1)
+  :custom ((doom-modeline-height 15)))
 
 #+end_src
+
+*** Which key
+which-key is a useful UI panel that appears when you start pressing any key binding
+in Emacs to offer you all possible completions for the prefix.
+
+#+begin_src emacs-lisp
+
+(use-package which-key
+  :init (which-key-mode)
+  :diminish which-key-mode
+  :config
+  (setq which-key-idle-delay 1))
+
+#+end_src
+
 ** One big config (TODO: split it into chunks)
 
 #+begin_src emacs-lisp
