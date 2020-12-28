@@ -26,6 +26,9 @@ or =C-c C-v t= in Emacs.
 #+end_src
 
 ** Package system setup
+This section configures use-package so that Emacs' built-in package
+manager can install necessary packages automatically.
+
 #+begin_src emacs-lisp
 
 ;; Initialize package sources
@@ -47,6 +50,42 @@ or =C-c C-v t= in Emacs.
 (require 'use-package)
 
 (setq use-package-always-ensure t)
+
+#+end_src
+
+
+** Basic UI configuration
+This section configures the basic UI settings for Emacs. 
+#+begin_src emacs-lisp
+
+(setq inhibit-startup-message t)
+
+(scroll-bar-mode -1)        ; Disable visible scrollbar
+(tool-bar-mode -1)          ; Disable the toolbar
+(tooltip-mode -1)           ; Disable tooltips
+(set-fringe-mode 10)        ; Give some breathing room
+
+(menu-bar-mode -1)          ; Disable the menu bar
+
+;; Set up the visible bell
+(setq visible-bell t)
+
+(column-number-mode)
+(global-display-line-numbers-mode t)
+
+;; Set frame transparency
+(set-frame-parameter (selected-frame) 'alpha mlee/frame-transparency)
+(add-to-list 'default-frame-alist `(alpha . ,mlee/frame-transparency))
+(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+;; Disable line numbers for some modes
+(dolist (mode '(org-mode-hook
+                term-mode-hook
+                shell-mode-hook
+                treemacs-mode-hook
+                eshell-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 #+end_src
 
