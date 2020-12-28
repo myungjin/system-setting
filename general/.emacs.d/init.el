@@ -70,13 +70,31 @@
   :hook (after-init . global-company-mode))
 
 (use-package lsp-mode
+  :config
+  (defun lee/lsp-setup()
+    (setq lsp-idle-delay 0.5
+          lsp-enable-symbol-highlighting nil
+          lsp-enable-snippet nil  ;; Not supported by company capf, which is the recommended company backend
+          lsp-pyls-plugins-flake8-enabled t)
+    (lsp-register-custom-settings
+     '(("pyls.plugins.pyls_mypy.enabled" t t)
+       ("pyls.plugins.pyls_mypy.live_mode" nil t)
+       ("pyls.plugins.pyls_black.enabled" t t)
+       ("pyls.plugins.pyls_isort.enabled" t t)
+
+       ;; Disable these as they're duplicated by flake8
+       ("pyls.plugins.pycodestyle.enabled" nil t)
+       ("pyls.plugins.mccabe.enabled" nil t)
+       ("pyls.plugins.pyflakes.enabled" nil t))))
   :hook
   ((python-mode . lsp)
    (c-mode . lsp)
-   (cpp-mode . lsp)))
+   (cpp-mode . lsp)
+   (lsp-mode . lsp-enable-which-key-integration)
+   (lsp-before-initialize . lee/lsp-setup)))
 
 (use-package lsp-ui
-    :config
+  :config
   (defun lee/lsp-ui-setup ()
     (setq lsp-ui-sideline-show-hover nil
           lsp-ui-sideline-enable nil
@@ -92,8 +110,10 @@
           lsp-ui-doc-header nil
           lsp-ui-doc-include-signature t
           lsp-ui-doc-use-childframe nil))
+  (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
+  (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references)
   :commands lsp-ui-mode
-`  :hook ((lsp-before-initialize . lee/lsp-ui-setup)))
+  :hook ((lsp-before-initialize . lee/lsp-ui-setup)))
 
 ;; client for c/c++ language server
 (use-package ccls
