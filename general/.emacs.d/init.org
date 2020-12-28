@@ -89,6 +89,14 @@ This section configures the basic UI settings for Emacs.
 
 #+end_src
 
+
+** Color Theme
+#+begin_src emacs-lisp
+
+(use-package doom-themes
+  :init (load-theme 'doom-acario-dark t))
+
+#+end_src
 ** One big config (TODO: split it into chunks)
 
 #+begin_src emacs-lisp
