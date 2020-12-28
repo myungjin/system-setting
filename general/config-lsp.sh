@@ -9,7 +9,9 @@ function config_macos {
 }
 
 function config_common {
-     pip install python-language-server[all]
+    pip install python-language-server[all]
+    pip install pyls-black pyls-isort pyls-mypy
+    pip install future
 }
 
 function main {
