@@ -25,54 +25,34 @@ or =C-c C-v t= in Emacs.
 
 #+end_src
 
+** Package system setup
 #+begin_src emacs-lisp
 
 ;; Initialize package sources
 (require 'package)
 
-;; The archives that package-list-packages and package-install will use.
-;; The default only includes elpa.gnu.org, but a lot of my installed packages
-;; come from MELPA.
-(setq package-archives
-      '(("gnu" . "https://elpa.gnu.org/packages/")
-        ("melpa-stb" . "https://stable.melpa.org/packages/")
-        ("melpa" . "https://melpa.org/packages/"))
-      tls-checktrust t
-      tls-program '("gnutls-cli --x509cafile %t -p %p %h")
-      gnutls-verify-error t)
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("org" . "https://orgmode.org/elpa/")
+                         ("elpa" . "https://elpa.gnu.org/packages/")))
 
-;; If there are multiple versions of a file, prefer the newer one. The default
-;; is to use the first one found.
-(setq load-prefer-newer t)
-
-;; Load packages. It's necessary to call this early.
 (package-initialize)
 
-(setq use-package-always-ensure nil
-      use-package-verbose t
-      use-package-minimum-reported-time 0.01)
+(unless package-archive-contents
+  (package-refresh-contents))
 
+;; Initialize use-package on non-Linux platforms
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
 
-;;; Now you can list available packages by running `M-x list-packages`.
-;;; Mark packages you want to install by pressing `i` and later press `x`
-;;; to install all marked packages (the necessary dependencies will be
-;;; installed automatically).
+(require 'use-package)
 
-;;; Now, load [use-package](https://github.com/jwiegley/use-package/)
-;;; package or propose automatic installation if it is not yet
-;;; installed.
+(setq use-package-always-ensure t)
 
-(unless (require 'use-package nil t)
-  (if (not (yes-or-no-p (concat "Refresh packages, install use-package and"
-				" other packages used by init file? ")))
-      (error "you need to install use-package first")
-    (package-refresh-contents)
-    (package-install 'use-package)
-    (require 'use-package)
-    (setq use-package-always-ensure t)))
+#+end_src
 
-;;; After loading `use-package` we can use it to configure other
-;;; packages.
+** One big config (TODO: split it into chunks)
+
+#+begin_src emacs-lisp
 
 (require 'bind-key)  ; Required for :bind in use-package
 
