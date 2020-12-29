@@ -8,9 +8,10 @@ function config_macos {
     # install c++ language server
     brew install ccls
 
-    # install fira font
+    # install fira and cantarell fonts
     brew tap homebrew/cask-fonts
     brew install --cask font-fira-code
+    brew install --cask font-cantarell
 }
 
 function config_common {
