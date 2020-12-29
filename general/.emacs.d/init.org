@@ -25,6 +25,7 @@ or =C-c C-v t= in Emacs.
 
 #+end_src
 
+
 ** Package system setup
 This section configures use-package so that Emacs' built-in package
 manager can install necessary packages automatically.
@@ -122,6 +123,71 @@ in Emacs to offer you all possible completions for the prefix.
   (setq which-key-idle-delay 1))
 
 #+end_src
+
+*** Ivy and Councel
+ivy is an excellent completion framework for Emacs. It provides a minimal yet
+powerful selection menu that appears when you open files, switch buffers, and
+for many other tasks in Emacs. Counsel is a customized set of commands to
+replace =find-file= with =counsel-find-file=, etc which provide useful commands
+for each of the default completion commands.
+
+ivy-rich adds extra columns to a few of the Counsel commands to provide more
+information about each item.
+
+#+begin_src emacs-lisp
+
+(use-package ivy
+  :diminish
+  :bind (("C-s" . swiper)
+         :map ivy-minibuffer-map
+         ("TAB" . ivy-alt-done)
+         ("C-l" . ivy-alt-done)
+         ("C-j" . ivy-next-line)
+         ("C-k" . ivy-previous-line)
+         :map ivy-switch-buffer-map
+         ("C-k" . ivy-previous-line)
+         ("C-l" . ivy-done)
+         ("C-d" . ivy-switch-buffer-kill)
+         :map ivy-reverse-i-search-map
+         ("C-k" . ivy-previous-line)
+         ("C-d" . ivy-reverse-i-search-kill))
+  :config
+  (ivy-mode 1))
+
+(use-package ivy-rich
+  :init
+  (ivy-rich-mode 1))
+
+(use-package counsel
+  :bind (("C-M-j" . 'counsel-switch-buffer)
+         :map minibuffer-local-map
+         ("C-r" . 'counsel-minibuffer-history))
+  :custom
+  (counsel-linux-app-format-function #'counsel-linux-app-format-function-name-only)
+  :config
+  (counsel-mode 1))
+
+#+end_src
+
+**** Improved candidate sorting with prescient.el
+prescient.el provides some helpful behavior for sorting Ivy completion candidates
+based on how recently or frequently you select them. This can be especially
+helpful when using M-x to run commands that you don’t have bound to a key but
+still need to access occasionally.
+
+#+begin_src emacs-lisp
+
+(use-package ivy-prescient
+  :after counsel
+  :custom
+  (ivy-prescient-enable-filtering nil)
+  :config
+  ;; Uncomment the following line to have sorting remembered across sessions!
+  ;(prescient-persist-mode 1)
+  (ivy-prescient-mode 1))
+
+#+end_src
+
 
 ** One big config (TODO: split it into chunks)
 
