@@ -7,7 +7,7 @@
 This is an Emacs configuration file that I use in my system. Many of them are
 collected from various sources in the Internet. One key source is from
 [[https://github.com/daviwil/emacs-from-scratch/blob/master/Emacs.org][Emacs From Scratch Configuration]].
-To tangle this init.org file and generate init.el file, run =M-x org-babel-tangel=
+To tangle this emacs.org file and generate init.el file, run =M-x org-babel-tangel=
 or =C-c C-v t= in Emacs. 
 
 * Configuration
@@ -15,6 +15,7 @@ or =C-c C-v t= in Emacs.
 ** Basic font and frame overrides
 
 #+begin_src emacs-lisp
+
   ;; Make font size overridable
   (defvar mlee/default-font-size 140)
   (defvar mlee/default-variable-font-size 140)
@@ -31,25 +32,25 @@ manager can install necessary packages automatically.
 
 #+begin_src emacs-lisp
 
-;; Initialize package sources
-(require 'package)
+  ;; Initialize package sources
+  (require 'package)
 
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
+  (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                           ("org" . "https://orgmode.org/elpa/")
+                           ("elpa" . "https://elpa.gnu.org/packages/")))
 
-(package-initialize)
+  (package-initialize)
 
-(unless package-archive-contents
-  (package-refresh-contents))
+  (unless package-archive-contents
+    (package-refresh-contents))
 
-;; Initialize use-package on non-Linux platforms
-(unless (package-installed-p 'use-package)
-  (package-install 'use-package))
+  ;; Initialize use-package on non-Linux platforms
+  (unless (package-installed-p 'use-package)
+    (package-install 'use-package))
 
-(require 'use-package)
+  (require 'use-package)
 
-(setq use-package-always-ensure t)
+  (setq use-package-always-ensure t)
 
 #+end_src
 
@@ -272,102 +273,29 @@ block was blindly copied from [[https://github.com/daviwil/emacs-from-scratch/bl
 
 #+begin_src emacs-lisp
 
-(defun mlee/org-mode-setup ()
-  (org-indent-mode)
-  (variable-pitch-mode 1)
-  (visual-line-mode 1))
+  (defun mlee/org-mode-setup ()
+    (org-indent-mode)
+    (variable-pitch-mode 1)
+    (visual-line-mode 1))
 
-(use-package org
-  :pin org
-  :hook (org-mode . mlee/org-mode-setup)
-  :config
-  (setq org-ellipsis " ▾")
+  (use-package org
+    :pin org
+    :hook (org-mode . mlee/org-mode-setup)
+    :config
+    (setq org-ellipsis " ▾")
 
-  (setq org-agenda-start-with-log-mode t)
-  (setq org-log-done 'time)
-  (setq org-log-into-drawer t)
+    (setq org-agenda-start-with-log-mode t)
+    (setq org-log-done 'time)
+    (setq org-log-into-drawer t)
 
-  (require 'org-habit)
-  (add-to-list 'org-modules 'org-habit)
-  (setq org-habit-graph-column 60)
+    (require 'org-habit)
+    (add-to-list 'org-modules 'org-habit)
+    (setq org-habit-graph-column 60)
 
-  (setq org-todo-keywords
-    '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-      (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+    (define-key global-map (kbd "C-c j")
+      (lambda () (interactive) (org-capture nil "jj")))
 
-  (setq org-refile-targets
-    '(("Archive.org" :maxlevel . 1)
-      ("Tasks.org" :maxlevel . 1)))
-
-  ;; Save Org buffers after refiling!
-  (advice-add 'org-refile :after 'org-save-all-org-buffers)
-
-  (setq org-tag-alist
-    '((:startgroup)
-       ; Put mutually exclusive tags here
-       (:endgroup)
-       ("@errand" . ?E)
-       ("@home" . ?H)
-       ("@work" . ?W)
-       ("agenda" . ?a)
-       ("planning" . ?p)
-       ("publish" . ?P)
-       ("batch" . ?b)
-       ("note" . ?n)
-       ("idea" . ?i)))
-
-  ;; Configure custom agenda views
-  (setq org-agenda-custom-commands
-   '(("d" "Dashboard"
-     ((agenda "" ((org-deadline-warning-days 7)))
-      (todo "NEXT"
-        ((org-agenda-overriding-header "Next Tasks")))
-      (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
-
-    ("n" "Next Tasks"
-     ((todo "NEXT"
-        ((org-agenda-overriding-header "Next Tasks")))))
-
-    ("W" "Work Tasks" tags-todo "+work-email")
-
-    ;; Low-effort next actions
-    ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
-     ((org-agenda-overriding-header "Low Effort Tasks")
-      (org-agenda-max-todos 20)
-      (org-agenda-files org-agenda-files)))
-
-    ("w" "Workflow Status"
-     ((todo "WAIT"
-            ((org-agenda-overriding-header "Waiting on External")
-             (org-agenda-files org-agenda-files)))
-      (todo "REVIEW"
-            ((org-agenda-overriding-header "In Review")
-             (org-agenda-files org-agenda-files)))
-      (todo "PLAN"
-            ((org-agenda-overriding-header "In Planning")
-             (org-agenda-todo-list-sublevels nil)
-             (org-agenda-files org-agenda-files)))
-      (todo "BACKLOG"
-            ((org-agenda-overriding-header "Project Backlog")
-             (org-agenda-todo-list-sublevels nil)
-             (org-agenda-files org-agenda-files)))
-      (todo "READY"
-            ((org-agenda-overriding-header "Ready for Work")
-             (org-agenda-files org-agenda-files)))
-      (todo "ACTIVE"
-            ((org-agenda-overriding-header "Active Projects")
-             (org-agenda-files org-agenda-files)))
-      (todo "COMPLETED"
-            ((org-agenda-overriding-header "Completed Projects")
-             (org-agenda-files org-agenda-files)))
-      (todo "CANC"
-            ((org-agenda-overriding-header "Cancelled Projects")
-             (org-agenda-files org-agenda-files)))))))
-
-  (define-key global-map (kbd "C-c j")
-    (lambda () (interactive) (org-capture nil "jj")))
-
-  (mlee/org-font-setup))
+    (mlee/org-font-setup))
 
 #+end_src
 
@@ -413,9 +341,9 @@ characters that you can control.
     (lsp-enable-which-key-integration t)
     :hook
     ((python-mode . lsp)
-    (c-mode . lsp)
-    (cpp-mode . lsp)
-    (lsp-mode . mlee/lsp-mode-setup))
+     (c-mode . lsp)
+     (cpp-mode . lsp)
+     (lsp-mode . mlee/lsp-mode-setup))
     :init
     (setq lsp-keymap-prefix "C-c l"))  ;; Or 'C-l', 's-l'
 
@@ -512,125 +440,121 @@ its commands directly.
 
 #+begin_src emacs-lisp
 
-(use-package projectile
-  :diminish projectile-mode
-  :config (projectile-mode)
-  :custom ((projectile-completion-system 'ivy))
-  :bind-keymap
-  ("C-c p" . projectile-command-map)
-  :init
-  ;; NOTE: Set this to the folder where you keep your Git repos!
-  (when (file-directory-p "~/Projects/Code")
-    (setq projectile-project-search-path '("~/Projects/Code")))
-  (setq projectile-switch-project-action #'projectile-dired))
+  (use-package projectile
+    :diminish projectile-mode
+    :config (projectile-mode)
+    :custom ((projectile-completion-system 'ivy))
+    :bind-keymap
+    ("C-c p" . projectile-command-map)
+    :init
+    ;; NOTE: Set this to the folder where you keep your Git repos!
+    (when (file-directory-p "~/Projects/Code")
+      (setq projectile-project-search-path '("~/Projects/Code")))
+    (setq projectile-switch-project-action #'projectile-dired))
 
-(use-package counsel-projectile
-  :config (counsel-projectile-mode))
+  (use-package counsel-projectile
+    :config (counsel-projectile-mode))
 
 #+end_src
 
 *** treemacs
-# #+begin_src emacs-lisp
-# (use-package treemacs
-#   :ensure t
-#   :defer t
-#   :init
-#   (with-eval-after-load 'winum
-#     (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
-#   :config
-#   (progn
-#     (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
-#           treemacs-deferred-git-apply-delay      0.5
-#           treemacs-directory-name-transformer    #'identity
-#           treemacs-display-in-side-window        t
-#           treemacs-eldoc-display                 t
-#           treemacs-file-event-delay              5000
-#           treemacs-file-extension-regex          treemacs-last-period-regex-value
-#           treemacs-file-follow-delay             0.2
-#           treemacs-file-name-transformer         #'identity
-#           treemacs-follow-after-init             t
-#           treemacs-git-command-pipe              ""
-#           treemacs-goto-tag-strategy             'refetch-index
-#           treemacs-indentation                   2
-#           treemacs-indentation-string            " "
-#           treemacs-is-never-other-window         nil
-#           treemacs-max-git-entries               5000
-#           treemacs-missing-project-action        'ask
-#           treemacs-move-forward-on-expand        nil
-#           treemacs-no-png-images                 nil
-#           treemacs-no-delete-other-windows       t
-#           treemacs-project-follow-cleanup        nil
-#           treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
-#           treemacs-position                      'left
-#           treemacs-read-string-input             'from-child-frame
-#           treemacs-recenter-distance             0.1
-#           treemacs-recenter-after-file-follow    nil
-#           treemacs-recenter-after-tag-follow     nil
-#           treemacs-recenter-after-project-jump   'always
-#           treemacs-recenter-after-project-expand 'on-distance
-#           treemacs-show-cursor                   nil
-#           treemacs-show-hidden-files             t
-#           treemacs-silent-filewatch              nil
-#           treemacs-silent-refresh                nil
-#           treemacs-sorting                       'alphabetic-asc
-#           treemacs-space-between-root-nodes      t
-#           treemacs-tag-follow-cleanup            t
-#           treemacs-tag-follow-delay              1.5
-#           treemacs-user-mode-line-format         nil
-#           treemacs-user-header-line-format       nil
-#           treemacs-width                         35
-#           treemacs-workspace-switch-cleanup      nil)
+#+begin_src emacs-lisp
+  (use-package treemacs
+    :ensure t
+    :defer t
+    :init
+    (with-eval-after-load 'winum
+      (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+    :config
+    (progn
+      (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
+            treemacs-deferred-git-apply-delay      0.5
+            treemacs-directory-name-transformer    #'identity
+            treemacs-display-in-side-window        t
+            treemacs-eldoc-display                 t
+            treemacs-file-event-delay              5000
+            treemacs-file-extension-regex          treemacs-last-period-regex-value
+            treemacs-file-follow-delay             0.2
+            treemacs-file-name-transformer         #'identity
+            treemacs-follow-after-init             t
+            treemacs-git-command-pipe              ""
+            treemacs-goto-tag-strategy             'refetch-index
+            treemacs-indentation                   2
+            treemacs-indentation-string            " "
+            treemacs-is-never-other-window         nil
+            treemacs-max-git-entries               5000
+            treemacs-missing-project-action        'ask
+            treemacs-move-forward-on-expand        nil
+            treemacs-no-png-images                 nil
+            treemacs-no-delete-other-windows       t
+            treemacs-project-follow-cleanup        nil
+            treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+            treemacs-position                      'left
+            treemacs-read-string-input             'from-child-frame
+            treemacs-recenter-distance             0.1
+            treemacs-recenter-after-file-follow    nil
+            treemacs-recenter-after-tag-follow     nil
+            treemacs-recenter-after-project-jump   'always
+            treemacs-recenter-after-project-expand 'on-distance
+            treemacs-show-cursor                   nil
+            treemacs-show-hidden-files             t
+            treemacs-silent-filewatch              nil
+            treemacs-silent-refresh                nil
+            treemacs-sorting                       'alphabetic-asc
+            treemacs-space-between-root-nodes      t
+            treemacs-tag-follow-cleanup            t
+            treemacs-tag-follow-delay              1.5
+            treemacs-user-mode-line-format         nil
+            treemacs-user-header-line-format       nil
+            treemacs-width                         35
+            treemacs-workspace-switch-cleanup      nil)
 
-#     ;; The default width and height of the icons is 22 pixels. If you are
-#     ;; using a Hi-DPI display, uncomment this to double the icon size.
-#     ;;(treemacs-resize-icons 44)
+      ;; The default width and height of the icons is 22 pixels. If you are
+      ;; using a Hi-DPI display, uncomment this to double the icon size.
+      ;;(treemacs-resize-icons 44)
 
-#     (treemacs-follow-mode t)
-#     (treemacs-filewatch-mode t)
-#     (treemacs-fringe-indicator-mode 'always)
-#     (pcase (cons (not (null (executable-find "git")))
-#                  (not (null treemacs-python-executable)))
-#       (`(t . t)
-#        (treemacs-git-mode 'deferred))
-#       (`(t . _)
-#        (treemacs-git-mode 'simple))))
-#   :bind
-#   (:map global-map
-#         ("M-0"       . treemacs-select-window)
-#         ("C-x t 1"   . treemacs-delete-other-windows)
-#         ("C-x t t"   . treemacs)
-#         ("C-x t B"   . treemacs-bookmark)
-#         ("C-x t C-t" . treemacs-find-file)
-#         ("C-x t M-t" . treemacs-find-tag)))
+      (treemacs-follow-mode t)
+      (treemacs-filewatch-mode t)
+      (treemacs-fringe-indicator-mode 'always)
+      (pcase (cons (not (null (executable-find "git")))
+                   (not (null treemacs-python-executable)))
+        (`(t . t)
+         (treemacs-git-mode 'deferred))
+        (`(t . _)
+         (treemacs-git-mode 'simple))))
+    :bind
+    (:map global-map
+          ("M-0"       . treemacs-select-window)
+          ("C-x t 1"   . treemacs-delete-other-windows)
+          ("C-x t t"   . treemacs)
+          ("C-x t B"   . treemacs-bookmark)
+          ("C-x t C-t" . treemacs-find-file)
+          ("C-x t M-t" . treemacs-find-tag)))
 
-# (use-package treemacs-projectile
-#   :after treemacs projectile
-#   :ensure t)
+  (use-package treemacs-projectile
+    :after treemacs projectile
+    :ensure t)
 
-# (use-package treemacs-icons-dired
-#   :after treemacs dired
-#   :ensure t
-#   :config (treemacs-icons-dired-mode))
+  (use-package treemacs-icons-dired
+    :after treemacs dired
+    :ensure t
+    :config (treemacs-icons-dired-mode))
 
-# (use-package treemacs-magit
-#   :after treemacs magit
-#   :ensure t)
+  (use-package treemacs-magit
+    :after treemacs magit
+    :ensure t)
 
-# (use-package treemacs-persp ;;treemacs-persective if you use perspective.el vs. persp-mode
-#   :after treemacs persp-mode ;;or perspective vs. persp-mode
-#   :ensure t
-#   :config (treemacs-set-scope-type 'Perspectives))
-# #+end_src
+  ;; (use-package treemacs-persp ;;treemacs-persective if you use perspective.el vs. persp-mode
+  ;;   :after treemacs persp-mode ;;or perspective vs. persp-mode
+  ;;   :ensure t
+  ;;   :config (treemacs-set-scope-type 'Perspectives))
+#+end_src
 
 *** Company
 
 #+begin_src emacs-lisp
 
   (require 'bind-key)  ; Required for :bind in use-package
-
-  ;; -----------------------------------------------------------------------------
-  ;; configs for programming language
-  ;; -----------------------------------------------------------------------------
 
   (use-package company
     :demand t
@@ -658,14 +582,14 @@ quickly using Magit's command panel system.
 
 #+begin_src emacs-lisp
 
-(use-package magit
-  :custom
-  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+  (use-package magit
+    :custom
+    (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
-;; NOTE: Make sure to configure a GitHub token before using this package!
-;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
-;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
-(use-package forge)
+  ;; NOTE: Make sure to configure a GitHub token before using this package!
+  ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
+  ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
+  (use-package forge)
 
 #+end_src
 
@@ -677,7 +601,7 @@ them yourself.
 
 #+begin_src emacs-lisp
 
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
+  (use-package rainbow-delimiters
+    :hook (prog-mode . rainbow-delimiters-mode))
 
 #+end_src
