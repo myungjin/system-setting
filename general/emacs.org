@@ -120,13 +120,24 @@ This section configures the basic UI settings for Emacs.
 #+end_src
 
 *** Better Modeline
+It appears that icons in all-the-icons are not displaying properly in macos.
+In such a case, check the fontset currently in effect. More details are found in
+the [[https://github.com/domtronn/all-the-icons.el/blob/master/README.md#troubleshooting][troubleshooting]] section from the all-the-icons github repo.
+We have to use =set-fontset-font= to load the affected the font family.
+
+The first time you load your configuration on a new machine, you’ll need to run
+=M-x all-the-icons-install-fonts= so that mode line icons display correctly.
+
 #+begin_src emacs-lisp
 
-(use-package all-the-icons)
+  (use-package all-the-icons
+    :config
+    (set-fontset-font t 'unicode (font-spec :family "all-the-icons") nil 'prepend)
+    (set-fontset-font t 'unicode (font-spec :family "github-octicons") nil 'prepend))
 
-(use-package doom-modeline
-  :init (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 15)))
+  (use-package doom-modeline
+    :init (doom-modeline-mode 1)
+    :custom ((doom-modeline-height 15)))
 
 #+end_src
 
@@ -136,11 +147,11 @@ in Emacs to offer you all possible completions for the prefix.
 
 #+begin_src emacs-lisp
 
-(use-package which-key
-  :init (which-key-mode)
-  :diminish which-key-mode
-  :config
-  (setq which-key-idle-delay 1))
+  (use-package which-key
+    :init (which-key-mode)
+    :diminish which-key-mode
+    :config
+    (setq which-key-idle-delay 1))
 
 #+end_src
 
@@ -462,6 +473,7 @@ its commands directly.
 #+end_src
 
 *** Treemacs all the icons
+
 #+begin_src  emacs-lisp
 
   (use-package treemacs-all-the-icons
@@ -469,12 +481,53 @@ its commands directly.
 
 #+end_src
 
-*** treemacs
+*** Treemacs
+Adjust DOOM Themes settings for Treemacs. The folloing  lambda function sets
+root icon to be regular folder icon, and adds 'chevron' icons to directories in
+order to display opened and closed states.  Also it indents all file icons with
+two spaces to match new directory icon indentation.
+
 #+begin_src emacs-lisp
 
-  ;; (use-package treemacs
-  ;;   :config
-  ;;   (treemacs-load-theme "all-the-icons"))
+  (eval-after-load 'treemacs
+    (lambda ()
+      (unless (require 'all-the-icons nil t)
+        (error "`all-the-icons' isn't installed"))
+      (let ((all-the-icons-default-adjust 0))
+        (setq treemacs-icons-hash (make-hash-table :size 200 :test #'equal)
+              treemacs-icon-fallback (concat "  " (all-the-icons-octicon "file-code" :v-adjust 0) " ")
+              treemacs-icon-text treemacs-icon-fallback))
+      (treemacs-modify-theme "Default"
+        :icon-directory (f-join treemacs-dir "icons/default")
+        :config
+        (progn
+          (treemacs-create-icon
+            :icon (concat (all-the-icons-octicon
+                       "chevron-right"
+                       :height 0.9
+                       :v-adjust 0
+                       :face '(:inherit font-lock-doc-face :slant normal))
+                       " ")
+            :extensions (dir-closed))
+          (treemacs-create-icon
+            :icon (concat (all-the-icons-octicon
+                       "chevron-down"
+                       :height 0.9
+                       :v-adjust 0
+                       :face '(:inherit font-lock-doc-face :slant normal))
+                       " ")
+            :extensions (dir-open))))
+
+      (treemacs-define-custom-icon (concat "  " (all-the-icons-octicon "file-media" :v-adjust 0))
+                                   "png" "jpg" "jpeg" "gif" "ico" "tif" "tiff" "svg" "bmp"
+                                   "psd" "ai" "eps" "indd" "mov" "avi" "mp4" "webm" "mkv"
+                                   "wav" "mp3" "ogg" "midi")
+      (treemacs-define-custom-icon (concat "  " (all-the-icons-octicon "file-text" :v-adjust 0))
+                                   "md" "markdown" "rst" "log" "org" "txt"
+                                   "CONTRIBUTE" "LICENSE" "README" "CHANGELOG")
+      (treemacs-define-custom-icon (concat "  " (all-the-icons-octicon "file-code" :v-adjust 0))
+                                   "yaml" "yml" "json" "xml" "toml" "cson" "ini"
+                                   "tpl" "erb" "mustache" "twig" "ejs" "mk" "haml" "pug" "jade")))
 
 #+end_src
 
