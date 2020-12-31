@@ -21,7 +21,7 @@ or =C-c C-v t= in Emacs.
   (defvar mlee/default-variable-font-size 140)
 
   ;; Make frame transparency overridable
-  (defvar mlee/frame-transparency '(90 . 90))
+  (defvar mlee/frame-transparency '(97 . 97))
 
 #+end_src
 
@@ -112,7 +112,7 @@ This section configures the basic UI settings for Emacs.
 #+begin_src emacs-lisp
 
   (use-package doom-themes
-    :init (load-theme 'doom-acario-dark t)
+    :init (load-theme 'doom-one t)
     :config
     ;; Enable flashing mode-line on errors
     (doom-themes-visual-bell-config))
@@ -591,6 +591,12 @@ two spaces to match new directory icon indentation.
            :extensions ("md" "rst" "log" "org" "txt"
                         "contribute" "license" "readme" "changelog"))))
       ))
+
+  (with-eval-after-load 'treemacs
+    (defun treemacs-ignore (filename absolute-path)
+      (or (string-equal filename ".mypy_cache")
+          (string-prefix-p "/x/y/z/" absolute-path)))
+    (add-to-list 'treemacs-ignored-file-predicates #'treemacs-ignore))
 
 #+end_src
 
