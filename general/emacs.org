@@ -572,7 +572,7 @@ two spaces to match new directory icon indentation.
                                :v-adjust 0
                                :face '(:inherit font-lock-doc-face :slant normal))
                          " ")
-           :extensions (".bash_profile" "json" "py" "sh" "xml" "yaml" "yml"))
+           :extensions (".bash_profile" "el" "json" "py" "sh" "xml" "yaml" "yml"))
           (treemacs-create-icon
            :icon (concat "  " (all-the-icons-octicon
                                "file-media"
