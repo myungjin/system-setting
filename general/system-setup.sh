@@ -20,6 +20,7 @@ function config_common {
     pip install pyls-black pyls-isort pyls-mypy
     pip install future
     pip install autopep8
+    pip install isort
 
     # config git
     git config --global alias.graph 'log --all --decorate --oneline --graph'
