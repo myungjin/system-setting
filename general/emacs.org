@@ -436,13 +436,23 @@ The "autopep8" should be installed by running =pip install autopep8=.
 
 #+begin_src  emacs-lisp
 
-  (use-package py-autopep8)
-  (setq py-autopep8-options '("--max-line-length=120"))
-  (add-hook 'python-mode-hook 'py-autopep8-enable-on-save)
+  (use-package py-autopep8
+    :config
+    (setq py-autopep8-options '("--max-line-length=120"))
+    (add-hook 'python-mode-hook 'py-autopep8-enable-on-save))
 
 #+end_src
 
+
 #+begin_src  emacs-lisp
+
+  (use-package py-isort
+    :config
+    (add-hook 'before-save-hook 'py-isort-before-save))
+
+#+end_src
+
+#+begin_src emacs-lisp
 
   (use-package pyvenv
     :demand t
