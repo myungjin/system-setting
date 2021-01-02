@@ -428,7 +428,20 @@ characters that you can control.
 
 #+end_src
 
-*** Python virtual env
+*** Python environments
+
+Provides the `py-autopep8' command, which uses the external "autopep8"
+tool to tidy up the current buffer according to Python's PEP8.
+The "autopep8" should be installed by running =pip install autopep8=.
+
+#+begin_src  emacs-lisp
+
+  (use-package py-autopep8)
+  (setq py-autopep8-options '("--max-line-length=120"))
+  (add-hook 'python-mode-hook 'py-autopep8-enable-on-save)
+
+#+end_src
+
 #+begin_src  emacs-lisp
 
   (use-package pyvenv
