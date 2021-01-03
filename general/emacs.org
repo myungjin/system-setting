@@ -678,3 +678,15 @@ them yourself.
     :hook (prog-mode . rainbow-delimiters-mode))
 
 #+end_src
+*** Diff-hl
+diff-hl highlights uncommitted changes. In particular, =diff-hl-flydiff-mode=
+implements highlighting changes on the fly. This requires Emacs 24.4 or newer.
+
+#+begin_src emacs-lisp
+
+  (use-package diff-hl
+    :config
+    (global-diff-hl-mode)
+    (diff-hl-flydiff-mode))
+
+#+end_src
