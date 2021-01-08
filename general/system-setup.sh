@@ -22,6 +22,7 @@ function config_common {
     pip install autopep8
     pip install isort
     pip install ruamel.yaml
+    pip install numpy
 
     # config git
     git config --global alias.graph 'log --all --decorate --oneline --graph'
