@@ -115,6 +115,15 @@ packman -S lightdm
 note: choose all, but choose deepin-anything-dkms
 pacman -S deepin
 
-systemctl enable lightd
+# This is to swap ctrl key and caps key globally in deepin DE
+gsettings set com.deepin.dde.keyboard layout-options '["ctrl:swapcaps"]'
 
-#end_src
+# Run the following to test lightdm before enabling it via systemd
+lightdm --test-mode --debug
+
+systemctl enable lightdm
+
+# reboot the system to run display manager
+reboot
+
+#+end_src
