@@ -1,13 +1,23 @@
 #!/usr/bin/env bash
 
 function config_linux {
-    echo "Do nothing"
+    sudo pacman -S ttf-fira-code cantarell-fonts ccls python-pip
 }
 
 function config_macos {
+    brew install pyenv
+    pyenv install 3.9.1
+    pyenv global 3.9.1
+    pyenv version
+
+    eval "$(pyenv init -)"
+    echo -e '\nif command -v pyenv 1>/dev/null 2>&1; then\n    eval "$(pyenv init -)"\nfi' >> ~/.bash_profile
+    
     # install c++ language server
     brew install ccls
 
+    # this is required for installing font-cantarell
+    brew install svn
     # install fira and cantarell fonts
     brew tap homebrew/cask-fonts
     brew install --cask font-fira-code

@@ -1,0 +1,120 @@
+#+TITLE: Emacs configuration file
+#+AUTHOR: Myungjin Lee
+#+EMAIL: myungjin.lee@gmail.com
+#+PROPERTY: header-args:shell
+
+#+begin_src shell
+
+iwctl
+[iwd]# station wlan0 connect *SSID*
+[iwd]# station wlan0 show
+[iwd]# exit
+
+ping archlinux.org
+
+timedatectl set-ntp true
+
+fdisk -l
+
+gdisk /dev/nvme0n1
+
+Note:
+- partition 1 -> EFI system partition (Code: EF00) size: 512MB
+- partition 2 -> Linux swap (Code: 8200) size: 64GB (2x memory size)
+- partition 3 -> Linux x86-64 root (/) (Code: 8304) size: remaining disk space
+
+mkfs.ext4 /dev/nvme0n1p3
+mkfs.fat -F32 /dev/nvme0n1p1
+mkswap /dev/nvme0n1p2
+
+mount /dev/nvme0n1p3 /mnt
+mkdir /mnt/efi
+mount /dev/nvme0n1p1 /mnt/efi
+swapon /dev/nvme0n1p2
+
+note - packages to install during linux installation: linux linux-firmware wpa_supplicant dhcpcd emacs grub efibootmgr amd-ucode
+
+pacstrap /mnt base linux linux-firmware wpa_supplicant dhcpcd emacs grub efibootmgr amd-ucode
+
+genfstab -U /mnt >> /mnt/etc/fstab
+
+arch-chroot /mnt
+
+loadkeys emacs
+
+ln -sf /usr/share/zoneinfo/US/Pacific /etc/localtime
+
+hwclock --systohc
+
+Edit /etc/locale.gen and uncomment en_US.UTF-8 UTF-8.
+locale-gen
+
+echo LANG=en_US.UTF-8 > /etc/locale.conf
+
+echo "KEYMAP=emacs" > /etc/vconsole.conf
+
+echo olympus > /etc/hostname
+
+echo "127.0.0.1	localhost" >> /etc/hosts
+echo "::1		localhost" >> /etc/hosts
+echo "127.0.1.1	olympus.localdomain	olympus" >> /etc/hosts
+
+passwd
+
+mkdir /efi/EFI
+
+grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB
+
+grub-mkconfig -o /boot/grub/grub.cfg
+
+exit
+
+umount -R /mnt
+
+Remove installation media (e.g., usb)
+reboot
+#+end_src
+
+
+* Post-installation configuration
+
+log into the system as root
+
+#+begin_src shell
+
+pacman -S sudo man man-pages
+
+ip link
+
+wpa_passphrase *SSID* *passprhase* > /etc/wpa_supplicant/wpa_supplicant-wlp2s0.conf
+
+ln -s /usr/share/dhcpcd/hooks/10-wpa_supplicant /usr/lib/dhcpcd/dhcpcd-hooks/
+
+systemctl enable wpa_supplicant@wlp2s0
+systemctl start wpa_supplicant@wlp2s0
+
+systemctl enable dhcpcd@wlp2s0
+systemctl start dhcpcd@wlp2s0
+
+useradd -m mlee
+echo "mlee ALL=(ALL) ALL" > /etc/sudoers.d/mlee
+
+#+end_src
+
+** x-window
+
+#+begin_src shell
+
+pacman -S xorg-server xterm
+
+lspci -v | grep -A1 -e VGA -e 3D
+pacman -Ss xf86-video
+pacman -S xf86-video-amdgpu
+packman -S lightdm
+
+note: choose all, but choose deepin-anything-dkms
+pacman -S deepin
+
+systemctl enable lightd
+
+#end_src

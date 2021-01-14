@@ -20,7 +20,7 @@ if [ -x /usr/bin/dircolors ]; then
     alias grep='grep --color=auto'
     alias fgrep='fgrep --color=auto'
     alias egrep='egrep --color=auto'
-elif [ "$OSTYPE" == "darwin12" ] || [ "$OSTYPE" == "darwin10.0" ]; then
+elif [[ "$OSTYPE" == "darwin"* ]]; then
     alias l='ls -CFG'
     alias ls='ls -G'
     alias ll='ls -alFG'
