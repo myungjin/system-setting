@@ -1,7 +1,18 @@
-#+TITLE: Emacs configuration file
+#+TITLE: Arch Linux installation and configuration guildeline
 #+AUTHOR: Myungjin Lee
 #+EMAIL: myungjin.lee@gmail.com
 #+PROPERTY: header-args:shell
+
+The following Arch Linux installation and configuration is tailored for Asrock DeskMini X300 mini with AMD 4750g APU.
+
+* Arch Linux installation
+** Pre-requisites
+An arch linux image needs to be downloaded. The downloaded image  needs to be burned into a bootable medium (e.g., usb stick).
+TODO: More details should be updated
+
+** Installation
+*** Wireless Interface setting
+This step is for configuring wireless interface so that necessary packages can be downloaded and installed from Arch Linux package repository.
 
 #+begin_src shell
 
@@ -11,17 +22,29 @@ iwctl
 [iwd]# exit
 
 ping archlinux.org
+#+end_src
+
+*** Date and time setting
+#+begin_src shell
 
 timedatectl set-ntp true
 
+#+end_src
+
+*** Filesystem configuration
+The following filesystem configuration is a reference, which is simple and sufficient for most desktop users:
+- partition 1 is for EFI system partition: Code should be specified as  =EF00= and  size is =512MB=.
+- partition 2 is for Linux swap: Code is =8200= and size is =64GB= (2x memory size)
+- partition 3 is for Linux x86-64 root (/): Code is =8304= and remaining disk space is allocated for this partition
+
+#+begin_src shell
 fdisk -l
 
 gdisk /dev/nvme0n1
 
-Note:
-- partition 1 -> EFI system partition (Code: EF00) size: 512MB
-- partition 2 -> Linux swap (Code: 8200) size: 64GB (2x memory size)
-- partition 3 -> Linux x86-64 root (/) (Code: 8304) size: remaining disk space
+#+end_src
+
+#+begin_src shell
 
 mkfs.ext4 /dev/nvme0n1p3
 mkfs.fat -F32 /dev/nvme0n1p1
@@ -32,7 +55,10 @@ mkdir /mnt/efi
 mount /dev/nvme0n1p1 /mnt/efi
 swapon /dev/nvme0n1p2
 
+#+end_src
+
 note - packages to install during linux installation: linux linux-firmware wpa_supplicant dhcpcd emacs grub efibootmgr amd-ucode
+#+begin_src shell
 
 pacstrap /mnt base linux linux-firmware wpa_supplicant dhcpcd emacs grub efibootmgr amd-ucode
 
@@ -83,6 +109,7 @@ log into the system as root
 #+begin_src shell
 
 pacman -S sudo man man-pages
+pacman -S --needed base-devel
 
 ip link
 
@@ -105,23 +132,26 @@ echo "mlee ALL=(ALL) ALL" > /etc/sudoers.d/mlee
 
 #+begin_src shell
 
-pacman -S xorg-server xterm
+pacman -S xorg-server xorg-server-xephyr tilda
+pacman -S lightdm-webkit2-greeter lightdm-webkit-theme-litarvan
+
+# edit /etc/lightdm/lightdm.conf
+# edit /etc/lightdm/lightdm-webkit2-greeter.conf and set theme or webkit-theme to litarvan
 
 lspci -v | grep -A1 -e VGA -e 3D
 pacman -Ss xf86-video
 pacman -S xf86-video-amdgpu
 packman -S lightdm
 
-note: choose all, but choose deepin-anything-dkms
-pacman -S deepin
+# This is to swap ctrl key and caps key globally in gnome DE
+gsettings set org.gnome.desktop.input-sources xkb-options '["ctrl:swapcaps"]'
 
-# This is to swap ctrl key and caps key globally in deepin DE
-gsettings set com.deepin.dde.keyboard layout-options '["ctrl:swapcaps"]'
 
 # Run the following to test lightdm before enabling it via systemd
 lightdm --test-mode --debug
 
 systemctl enable lightdm
+
 
 # reboot the system to run display manager
 reboot
