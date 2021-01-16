@@ -66,8 +66,6 @@ genfstab -U /mnt >> /mnt/etc/fstab
 
 arch-chroot /mnt
 
-loadkeys emacs
-
 ln -sf /usr/share/zoneinfo/US/Pacific /etc/localtime
 
 hwclock --systohc
@@ -89,8 +87,26 @@ passwd
 
 mkdir /efi/EFI
 
+# run the following to identify the graphic card
+lspci -v | grep -A1 -e VGA -e 3D
+
+# run the following to get a complete list of open-source video drivers
+pacman -Ss xf86-video
+
+# Since the installed CPU is amd 4750g, install xf86-video-amdgpu
+pacman -S xf86-video-amdgpu
+
+# modify /etc/mkinitcpio.conf
+# add amdgpu in MODULES array
+# add resume hook in HOOKS array; right before fsck hook
+
 grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB
 
+# modify /etc/default/grub
+# add resume=/dev/nvme0n1p2 in GRUB_CMDLINE_LINUX_DEFAULT; here /dev/nvme0n1p2 should be swap partition
+# Note resume=/dev/nvme0n1p2 is to enable hibernate
+
+# Then, run the following to create grub.cfg
 grub-mkconfig -o /boot/grub/grub.cfg
 
 exit
@@ -132,16 +148,14 @@ echo "mlee ALL=(ALL) ALL" > /etc/sudoers.d/mlee
 
 #+begin_src shell
 
-pacman -S xorg-server xorg-server-xephyr tilda
-pacman -S lightdm-webkit2-greeter lightdm-webkit-theme-litarvan
+pacman -S xorg-server xorg-server-xephyr
+pacman -S lightdm lightdm-webkit2-greeter lightdm-webkit-theme-litarvan
 
-# edit /etc/lightdm/lightdm.conf
+# install tilda (a drop-down terminal emulator in X)
+pacman -S tilda
+
+# edit /etc/lightdm/lightdm.conf and set lightdm-webkit2-greeter as greeter
 # edit /etc/lightdm/lightdm-webkit2-greeter.conf and set theme or webkit-theme to litarvan
-
-lspci -v | grep -A1 -e VGA -e 3D
-pacman -Ss xf86-video
-pacman -S xf86-video-amdgpu
-packman -S lightdm
 
 # This is to swap ctrl key and caps key globally in gnome DE
 gsettings set org.gnome.desktop.input-sources xkb-options '["ctrl:swapcaps"]'
@@ -151,7 +165,6 @@ gsettings set org.gnome.desktop.input-sources xkb-options '["ctrl:swapcaps"]'
 lightdm --test-mode --debug
 
 systemctl enable lightdm
-
 
 # reboot the system to run display manager
 reboot
