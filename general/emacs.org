@@ -342,7 +342,8 @@ characters that you can control.
 #+end_src
 
 
-** Development
+
+** Development/Productivity
 *** IDE feature: lsp-mode
 #+begin_src emacs-lisp
 
@@ -688,5 +689,11 @@ implements highlighting changes on the fly. This requires Emacs 24.4 or newer.
     :config
     (global-diff-hl-mode)
     (diff-hl-flydiff-mode))
+
+#+end_src
+*** Auto brackets
+#+begin_src emacs-lisp
+
+  (electric-pair-mode 1)
 
 #+end_src
