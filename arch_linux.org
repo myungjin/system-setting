@@ -157,6 +157,22 @@ pacman -S gnome gnome-tweaks
 # install tilda (a drop-down terminal emulator in X)
 pacman -S tilda
 
+# install numix-circle icon theme from AUR; change the icon theme from gnome tweaks
+# first, install numix-icon-theme-git
+pushd /tmp
+git clone https://aur.archlinux.org/numix-icon-theme-git.git 
+pushd numix-icon-theme-git
+makepkg -si
+popd
+
+# then, install numix-circle-icon-theme-git
+git clone https://aur.archlinux.org/numix-circle-icon-theme-git.git 
+pushd numix-circle-icon-theme-git
+makepkg -si
+popd
+
+popd
+
 # edit /etc/lightdm/lightdm.conf and set lightdm-webkit2-greeter as greeter
 # edit /etc/lightdm/lightdm-webkit2-greeter.conf and set theme or webkit-theme to litarvan
 
