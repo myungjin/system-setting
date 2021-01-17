@@ -151,6 +151,9 @@ echo "mlee ALL=(ALL) ALL" > /etc/sudoers.d/mlee
 pacman -S xorg-server xorg-server-xephyr
 pacman -S lightdm lightdm-webkit2-greeter lightdm-webkit-theme-litarvan
 
+# do not install gdm since lightdm is the dm that is going to be used
+pacman -S gnome gnome-tweaks
+
 # install tilda (a drop-down terminal emulator in X)
 pacman -S tilda
 
