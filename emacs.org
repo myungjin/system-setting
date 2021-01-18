@@ -431,16 +431,27 @@ characters that you can control.
 
 *** Python environments
 
-Provides the `py-autopep8' command, which uses the external "autopep8"
-tool to tidy up the current buffer according to Python's PEP8.
-The "autopep8" should be installed by running =pip install autopep8=.
+Provides the `py-yapf' command, which uses the external "yapf"
+tool to tidy up the current buffer.
+The "yapf" should be installed by running =pacman -S yapf= in arch linux.
+If OS is not arch linux, the package can be installed via  =pip install yapf=.
+
+In order to use different style (e.g., google, facebook), run the following in shell:
+#+begin_src shell
+
+mkdir -p ~/.config/yapf
+cat << EOF >> ~/.config/yapf/style
+[style]
+based_on_style = facebook
+EOF
+
+#+end_src
 
 #+begin_src  emacs-lisp
 
-  (use-package py-autopep8
+  (use-package py-yapf
     :config
-    (setq py-autopep8-options '("--max-line-length=120"))
-    (add-hook 'python-mode-hook 'py-autopep8-enable-on-save))
+    (add-hook 'python-mode-hook 'py-yapf-enable-on-save))
 
 #+end_src
 
