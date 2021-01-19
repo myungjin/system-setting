@@ -3,15 +3,13 @@
 #+EMAIL: myungjin.lee@gmail.com
 #+PROPERTY: header-args:shell
 
-The following Arch Linux installation and configuration is tailored for Asrock DeskMini X300 mini with AMD 4750g APU.
+The following Arch Linux installation and configuration is tailored for Asrock DeskMini X300 mini with AMD RyZen 4750g APU.
 
-* Arch Linux installation
-** Pre-requisites
+* Pre-requisites
 An arch linux image needs to be downloaded. The downloaded image  needs to be burned into a bootable medium (e.g., usb stick).
-TODO: More details should be updated
 
-** Installation
-*** Wireless Interface setting
+* Installation
+** Wireless Interface setting
 This step is for configuring wireless interface so that necessary packages can be downloaded and installed from Arch Linux package repository.
 
 #+begin_src shell
@@ -24,14 +22,14 @@ iwctl
 ping archlinux.org
 #+end_src
 
-*** Date and time setting
+** Date and time setting
 #+begin_src shell
 
 timedatectl set-ntp true
 
 #+end_src
 
-*** Filesystem configuration
+** Filesystem configuration
 The following filesystem configuration is a reference, which is simple and sufficient for most desktop users:
 - partition 1 is for EFI system partition: Code should be specified as  =EF00= and  size is =512MB=.
 - partition 2 is for Linux swap: Code is =8200= and size is =64GB= (2x memory size)
@@ -43,6 +41,8 @@ fdisk -l
 gdisk /dev/nvme0n1
 
 #+end_src
+
+After disk is partitioned via gdisk, run the following to format disk partitions.
 
 #+begin_src shell
 
@@ -57,7 +57,16 @@ swapon /dev/nvme0n1p2
 
 #+end_src
 
-note - packages to install during linux installation: linux linux-firmware wpa_supplicant dhcpcd emacs grub efibootmgr amd-ucode
+A quite number of  packages need to be installed during linux installation via pacstrap:
+- linux
+- linux-firmware
+- wpa_supplicant
+- dhcpcd
+- emacs
+- grub
+- efibootmgr
+- amd-ucode
+
 #+begin_src shell
 
 pacstrap /mnt base linux linux-firmware wpa_supplicant dhcpcd emacs grub efibootmgr amd-ucode
@@ -70,7 +79,7 @@ ln -sf /usr/share/zoneinfo/US/Pacific /etc/localtime
 
 hwclock --systohc
 
-Edit /etc/locale.gen and uncomment en_US.UTF-8 UTF-8.
+# Edit /etc/locale.gen and uncomment en_US.UTF-8 UTF-8.
 locale-gen
 
 echo LANG=en_US.UTF-8 > /etc/locale.conf
@@ -113,14 +122,16 @@ exit
 
 umount -R /mnt
 
-Remove installation media (e.g., usb)
+# Remove installation media (e.g., usb)
 reboot
-#+end_src
 
+#+end_src
 
 * Post-installation configuration
 
-log into the system as root
+To start post-installation configuration, log into the system as root.
+
+** permanent wireless interface setup
 
 #+begin_src shell
 
@@ -179,13 +190,23 @@ popd
 # This is to swap ctrl key and caps key globally in gnome DE
 gsettings set org.gnome.desktop.input-sources xkb-options '["ctrl:swapcaps"]'
 
-
 # Run the following to test lightdm before enabling it via systemd
 lightdm --test-mode --debug
 
 systemctl enable lightdm
 
+# enable/start bluetooth
+systemctl enable bluetooth
+systemctl start bluetooth
+
 # reboot the system to run display manager
 reboot
 
 #+end_src
+
+* ETC
+** Bluetooth headset
+Bluetooth and headset can be set up in gnome desktop environment.
+Once gnome is set up, connect bluetooth headset via gnome desktop interface.
+Once the headset is connected to the system, launch `Settings' application.
+Choose `Sound', and choose the headset in `Output Deivce' and a configuration relevant to the headset in `Configuration'
