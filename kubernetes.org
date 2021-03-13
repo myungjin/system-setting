@@ -1,0 +1,275 @@
+#+TITLE: Kubernetes cluster setup in a box
+#+AUTHOR: Myungjin Lee
+#+EMAIL: myungjin.lee@gmail.com
+#+PROPERTY: header-args:shell
+
+This document is for setting up a kubernetes cluster in a single baremetal box on top of Arch Linux.
+At a high level, the process consists of the following steps:
+- Setting up hypervisor
+- Setting up VMs
+- Setting up Rancher
+- Configuration of Kubernetes
+
+* Setting up hypervisor
+  The guideline is based on https://www.mvps.net/docs/qemu-and-kvm-in-arch-linux/.
+  Hypervisor is necessary in order to run VMs. Here KVM is used as a hypervisor.
+** Checking KVM support
+To check if KVM is supported, run the following command:
+#+begin_src shell
+lscpu | grep Virtualization
+#+end_src
+
+An output similar to the following is expected.
+#+begin_example
+Virtualization:                  AMD-V
+#+end_example
+
+To check if required modules are available, run the following command
+#+begin_src shell
+zgrep CONFIG_KVM /proc/config.gz
+#+end_src
+
+The answer should look like the following:
+#+begin_example
+CONFIG_KVM_GUEST=y
+CONFIG_KVM_MMIO=y
+CONFIG_KVM_ASYNC_PF=y
+CONFIG_KVM_VFIO=y
+CONFIG_KVM_GENERIC_DIRTYLOG_READ_PROTECT=y
+CONFIG_KVM_COMPAT=y
+CONFIG_KVM_XFER_TO_GUEST_WORK=y
+CONFIG_KVM=m
+CONFIG_KVM_INTEL=m
+CONFIG_KVM_AMD=m
+CONFIG_KVM_AMD_SEV=y
+CONFIG_KVM_MMU_AUDIT=y
+#+end_example
+
+To check if the necessary modules are loaded automatically, run the following command:
+#+begin_src shell
+lsmod | grep kvm
+#+end_src
+
+An output similar to the following is expected.
+#+begin_example
+kvm_amd               131072  4
+kvm                   970752  1 kvm_amd
+irqbypass              16384  1 kvm
+ccp                   114688  1 kvm_amd
+#+end_example
+
+** Installing QEMU in Arch Linux
+
+With KVM support available, we need to install a couple of packages: QEMU, virt-manager, ebtables and dnsmasq.
+#+begin_src shell
+sudo pacman -Syu qemu virt-manager ebtables dnsmasq
+#+end_src
+
+We start the libvirtd service and let it boot:
+#+begin_src 
+sudo systemctl enable --now libvirtd
+#+end_src
+
+We check its status (it must be active):
+#+begin_src shell
+sudo systemctl status libvirtd
+#+end_src
+
+** Using Virtual Machine Manager (virt-manager) as a non-root user
+
+1. Check if the libvirt group exists:
+
+#+begin_src shell
+getent group | grep libvirt
+#+end_src
+An expected output looks like the following:
+#+begin_example
+libvirt:x:613:mlee
+#+end_example
+
+If it does not already exist in the system, create this group with the following command (where 7777 is the group ID):
+#+begin_src shell
+sudo groupadd -g 7777 libvirt
+#+end_src
+
+2. Add our user to the libvirt group:
+#+begin_src  shell
+sudo usermod -aG libvirt mlee
+#+end_src
+
+Check if our user has been added to this group:
+#+begin_src  shell
+sudo id mvps | grep libvirt
+#+end_src
+
+3. Edit the libvirtd.conf configuration file:
+#+begin_src  shell
+sudo vi /etc/libvirt/libvirtd.conf
+#+end_src
+
+Add the following two lines at the end:
+
+#+begin_example
+unix_sock_group = “libvirt”
+unix_sock_rw_perms = “0770”
+#+end_example
+
+4. Restart the service:
+
+Let's enable default network in libvirtd
+#+begin_src  shell
+virsh -c qemu:///system net-start default
+virsh -c qemu:///system net-autostart default
+#+end_src
+
+#+begin_src  shell
+sudo systemctl restart libvirtd
+#+end_src
+
+5. Launch  Virtual Machine Manager
+
+We launch Virtual Machine Manager either from the menu or from the command line:
+#+begin_src  shell
+virt-manager
+#+end_src
+
+* Setting up VM
+** Setting up Ubuntu Server 20.04
+#+begin_src  shell
+export VM_NAME=ubuntu02
+export BASE_IMAGE=ubuntu-20.04-server-cloudimg-amd64.img
+export PUB_KEY=$(cat ~/.ssh/id_ed25519.pub)
+#+end_src
+
+#+begin_src  shell
+qemu-img info $BASE_IMAGE
+#+end_src
+
+#+begin_example
+image: ubuntu-20.04-server-cloudimg-amd64.img
+file format: qcow2
+virtual size: 2.2 GiB (2361393152 bytes)
+disk size: 527 MiB
+cluster_size: 65536
+Format specific information:
+    compat: 0.10
+    compression type: zlib
+    refcount bits: 16
+#+end_example
+
+#+begin_src  shell
+sudo cp $BASE_IMAGE /var/lib/libvirt/images/$VM_NAME.qcow2
+sudo qemu-img resize -f qcow2 /var/lib/libvirt/images/$VM_NAME.qcow2 25G
+#+end_src
+
+#+begin_src shell
+cat >meta-data <<EOF
+local-hostname: $VM_NAME
+EOF
+#+end_src
+
+#+begin_src shell
+cat >user-data <<EOF
+#cloud-config
+users:
+  - name: ubuntu
+    ssh-authorized-keys:
+      - $PUB_KEY
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    groups: sudo
+    shell: /bin/bash
+runcmd:
+  - echo "AllowUsers ubuntu" >> /etc/ssh/sshd_config
+  - restart ssh
+EOF
+#+end_src
+
+To create an ISO:
+#+begin_src shell
+sudo genisoimage -output /var/lib/libvirt/images/cloud-config.iso \
+    -volid cidata -joliet -rock user-data meta-data
+#+end_src
+
+#+begin_src shell
+sudo virt-install --connect qemu:///system \
+    --name $VM_NAME \
+    --vcpus 2 \
+    --memory 4096 \
+    --disk path=/var/lib/libvirt/images/$VM_NAME.qcow2,device=disk,bus=virtio \
+    --disk /var/lib/libvirt/images/cloud-config.iso,device=cdrom \
+    --os-type linux \
+    --os-variant ubuntu20.04 \
+    --virt-type kvm \
+    --network network=default,model=virtio \
+    --graphics none \
+    --import
+#+end_src
+
+** Setting up RancherOS
+# A small virtual machine cluster setup in a single machine
+
+# <Rancher OS VM>
+
+# Rancher OS cloud-config.yaml file URL: https://bit.ly/2NtNn3d
+
+# $ wget https://bit.ly/2NtNn3d -O cloud-config.yaml
+# $ ros install -c cloud-config.yaml -d /dev/vda
+
+* Setting up Rancher
+** Installing Rancher
+Follow the quickstart manual setup from [[https://rancher.com/docs/rancher/v2.x/en/quick-start-guide/deployment/quickstart-manual-setup/][here]].
+
+To install Rancher on your host, connect to it and then use a shell to install.
+
+Log in to your Linux host using your preferred shell.
+
+From your shell, enter the following command:
+
+#+begin_src shell
+sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher
+#+end_src
+
+** Login
+Log in to Rancher to begin using the application. After you log in, you’ll make some one-time configurations.
+
+#+begin_example
+1. Open a web browser and enter the IP address of your host: https://<SERVER_IP>.
+
+Replace <SERVER_IP> with your host IP address.
+
+2. When prompted, create a password for the default admin account there cowpoke!
+
+3. Set the Rancher Server URL. The URL can either be an IP address or a host name. However, each node added to your cluster must be able to connect to this URL.
+
+If you use a hostname in the URL, this hostname must be resolvable by DNS on the nodes you want to add to you cluster.
+#+end_example
+
+
+** Create a cluster
+Welcome to Rancher! You are now able to create your first Kubernetes cluster.
+
+In this task, you can use the versatile Custom option. This option lets you add any Linux host (cloud-hosted VM, on-prem VM, or bare-metal) to be used in a cluster.
+
+#+begin_example
+1. From the Clusters page, click Add Cluster.
+
+2. Choose Existing Nodes.
+
+3. Enter a Cluster Name.
+
+4. Skip Member Roles and Cluster Options. We’ll tell you about them later.
+
+5. Click Next.
+
+6. From Node Role, select all the roles: etcd, Control, and Worker.
+
+7. Optional: Rancher auto-detects the IP addresses used for Rancher communication and cluster communication. You can override these using Public Address and Internal Address in the Node Address section.
+
+8. Skip the Labels stuff. It’s not important for now.
+
+9. Copy the command displayed on screen to your clipboard.
+
+10. Log in to your Linux host using your preferred shell, such as PuTTy or a remote Terminal connection. Run the command copied to your clipboard.
+
+11. When you finish running the command on your Linux host, click Done.
+#+end_example
