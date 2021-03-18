@@ -359,33 +359,17 @@ characters that you can control.
     ((python-mode . lsp)
      (c-mode . lsp)
      (cpp-mode . lsp)
-     (lsp-mode . mlee/lsp-mode-setup))
+     (lsp-mode . mlee/lsp-mode-setup)
+     (go-mode-hook . lsp-deferred))
     :init
     (setq lsp-keymap-prefix "C-c l"))  ;; Or 'C-l', 's-l'
 
-  ;; (use-package lsp-mode
-  ;;   :config
-  ;;   (defun mlee/lsp-mode-setup()
-  ;;     (setq lsp-idle-delay 0.5
-  ;;           lsp-enable-symbol-highlighting nil
-  ;;           lsp-enable-snippet nil  ;; Not supported by company capf, which is the recommended company backend
-  ;;           lsp-pyls-plugins-flake8-enabled t))
-  ;;     (lsp-register-custom-settings
-  ;;      '(("pyls.plugins.pyls_mypy.enabled" t t)
-  ;;        ("pyls.plugins.pyls_mypy.live_mode" nil t)
-  ;;        ("pyls.plugins.pyls_black.enabled" t t)
-  ;;        ("pyls.plugins.pyls_isort.enabled" t t)
-
-  ;;        ;; Disable these as they're duplicated by flake8
-  ;;        ("pyls.plugins.pycodestyle.enabled" nil t)
-  ;;        ("pyls.plugins.mccabe.enabled" nil t)
-  ;;        ("pyls.plugins.pyflakes.enabled" nil t)))
-  ;;   :hook
-  ;;   ((python-mode . lsp)
-  ;;    (c-mode . lsp)
-  ;;    (cpp-mode . lsp)
-  ;;    (lsp-mode . lsp-enable-which-key-integration)
-  ;;    (lsp-before-initialize . mlee/lsp-mode-setup)))
+  ;;Set up before-save hooks to format buffer and add/delete imports.
+  ;;Make sure you don't have other gofmt/goimports hooks enabled.
+  (defun lsp-go-install-save-hooks ()
+    (add-hook 'before-save-hook #'lsp-format-buffer t t)
+    (add-hook 'before-save-hook #'lsp-organize-imports t t))
+  (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
 
 #+end_src
 
@@ -426,6 +410,14 @@ characters that you can control.
 
   (use-package lsp-treemacs
     :after lsp)
+
+#+end_src
+
+*** IDE feature: go-mode
+#+begin_src emacs-lisp
+
+  (use-package go-mode
+    :hook ((go-mode . lsp)))
 
 #+end_src
 
