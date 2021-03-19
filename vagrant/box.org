@@ -1,0 +1,56 @@
+#+TITLE: Vagrant base box image creation guide
+#+AUTHOR: Myungjin Lee
+#+EMAIL: myungjin.lee@gmail.com
+#+PROPERTY: header-args:shell
+
+* Setup
+#+begin_src shell
+
+vagrant up
+
+vagrant ssh default
+
+#+end_src
+
+Within VM, run =bootstrap.sh=.
+
+#+begin_src shell
+
+/vagrant/bootstrap.sh
+
+# clean up bash history
+cat /dev/null > ~/.bash_history && history -c && exit
+
+#+end_src
+
+From host OS, run the following to create a box
+#+begin_src shell
+
+BOX_NAME=fledge
+vagrant package --base basevm --output /tmp/$BOX_NAME.box
+
+#+end_src
+
+* Validation
+#+begin_src shell
+
+BOX_NAME=fledge
+
+mv $BOX_NAME.box /tmp
+
+cd /tmp
+
+vagrant box add $BOX_NAME $BOX_NAME.box
+
+vagrant init $BOX_NAME
+
+vagrant up
+
+# check if ssh is successful
+vagrant ssh default
+
+#+end_src
+
+* Upload box to vagrant cloud
+Go to https://app.vagrantup.com/ and and log into vagrant cloud.
+Then, create a box and upload the created box.
