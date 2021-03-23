@@ -18,11 +18,15 @@ function install_packages {
 }
 
 function install_ml_libraries {
-    pip3 install torch==1.8.0+cpu torchvision==0.9.0+cpu torchaudio==0.8.0 \
-	 -f https://download.pytorch.org/whl/torch_stable.html
+    pip3 install --upgrade pip
 
-    pip3 install tensorflow
-    pip3 install keras
+    PIP3=$HOME/.local/bin/pip3
+
+    $PIP3 install torch==1.8.0+cpu torchvision==0.9.0+cpu torchaudio==0.8.0 \
+	  -f https://download.pytorch.org/whl/torch_stable.html
+
+    $PIP3 install tensorflow
+    $PIP3 install keras
 }
 
 function install_vernemq {
