@@ -27,6 +27,8 @@ function install_ml_libraries {
 
     $PIP3 install tensorflow
     $PIP3 install keras
+
+    $PIP3 cache purge
 }
 
 function install_vernemq {
