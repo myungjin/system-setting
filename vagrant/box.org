@@ -26,7 +26,7 @@ cat /dev/null > ~/.bash_history && history -c && exit
 From host OS, run the following to create a box
 #+begin_src shell
 
-BOX_NAME=fledge
+BOX_NAME=mybox
 vagrant package --base basevm --output /tmp/$BOX_NAME.box
 
 #+end_src
@@ -34,11 +34,9 @@ vagrant package --base basevm --output /tmp/$BOX_NAME.box
 * Validation
 #+begin_src shell
 
-BOX_NAME=fledge
-
-mv $BOX_NAME.box /tmp
-
 cd /tmp
+
+BOX_NAME=mybox
 
 vagrant box add $BOX_NAME $BOX_NAME.box
 
