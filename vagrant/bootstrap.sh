@@ -32,24 +32,25 @@ function install_ml_libraries {
 }
 
 function install_vernemq {
+    PROG=vernemq
+    VERSION=1.11.0
+
     cd /tmp
-    VERNEMQ=vernemq
-    VERNEMQ_VERSION=1.11.0
-    if [ ! -d $VERNEMQ ]; then
-	git clone https://github.com/$VERNEMQ/$VERNEMQ.git
+    if [ ! -d $PROG ]; then
+	git clone https://github.com/$PROG/$PROG.git
     fi
 
     # compile
-    cd $VERNEMQ
-    git checkout tags/$VERNEMQ_VERSION
+    cd $PROG
+    git checkout tags/$VERSION
     make rel
 
     # install
-    sudo cp -rf _build/default/rel/$VERNEMQ /
+    sudo cp -rf _build/default/rel/$PROG /
 
     # delete source code
     cd /
-    rm -rf /tmp/$VERNEMQ
+    rm -rf /tmp/$PROG
 
     # create systemd unit file
     sudo bash -c 'cat <<EOF > /lib/systemd/system/vernemq.service
@@ -80,26 +81,23 @@ WantedBy=multi-user.target
 EOF'
 
     # post install configuration
+    HOME_DIR=/$PROG
 
     # create group
-    if ! getent group vernemq >/dev/null; then
-	sudo addgroup --system vernemq
+    if ! getent group $PROG >/dev/null; then
+	sudo addgroup --system $PROG
     fi
 
     # create user
-    if ! getent passwd vernemq >/dev/null; then
-	sudo adduser --ingroup vernemq \
-	     --home /vernemq \
+    if ! getent passwd $PROG >/dev/null; then
+	sudo adduser --ingroup $PROG \
+	     --home $HOME_DIR \
 	     --disabled-password \
 	     --system --shell /bin/bash --no-create-home \
-	     --gecos "VerneMQ broker" vernemq
+	     --gecos "VerneMQ broker" $PROG
     fi
 
-    sudo chown -R vernemq:vernemq /vernemq
-
-    sudo systemctl --system daemon-reload > /dev/null || true
-    sudo systemctl enable vernemq > /dev/null || true
-    sudo systemctl start vernemq > /dev/null || true
+    sudo chown -R $PROG:$PROG $HOME_DIR
 }
 
 function config_user {
