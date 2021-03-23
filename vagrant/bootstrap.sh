@@ -17,7 +17,7 @@ function install_packages {
     sudo apt clean
 }
 
-function install_ml_libaries {
+function install_ml_libraries {
     pip3 install torch==1.8.0+cpu torchvision==0.9.0+cpu torchaudio==0.8.0 \
 	 -f https://download.pytorch.org/whl/torch_stable.html
 
