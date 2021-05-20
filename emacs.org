@@ -616,7 +616,15 @@ two spaces to match new directory icon indentation.
                                :face '(:inherit font-lock-doc-face :slant normal))
                          " ")
            :extensions ("md" "rst" "log" "org" "txt"
-                        "contribute" "license" "readme" "changelog"))))
+                        "contribute" "license" "readme" "changelog"))
+          (treemacs-create-icon
+           :icon (concat "  " (all-the-icons-alltheicon
+                               "go"
+                               :height 0.9
+                               :v-adjust 0
+                               :face '(:inherit font-lock-doc-face :slant normal))
+                         " ")
+           :extensions ("go" "go.mod" "go.sum"))))
       ))
 
   (with-eval-after-load 'treemacs
