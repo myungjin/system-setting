@@ -421,6 +421,13 @@ characters that you can control.
 
 #+end_src
 
+*** IDE featuer: YAML mode
+#+begin_src emacs-lisp
+
+  (use-package yaml-mode)
+
+#+end_src
+
 *** Python environments
 
 Provides the `py-yapf' command, which uses the external "yapf"
