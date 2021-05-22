@@ -14,18 +14,18 @@ This step is for configuring wireless interface so that necessary packages can b
 
 #+begin_src shell
 
-iwctl
-[iwd]# station wlan0 connect *SSID*
-[iwd]# station wlan0 show
-[iwd]# exit
+  iwctl
+  [iwd]# station wlan0 connect *SSID*
+  [iwd]# station wlan0 show
+  [iwd]# exit
 
-ping archlinux.org
+  ping archlinux.org
 #+end_src
 
 ** Date and time setting
 #+begin_src shell
 
-timedatectl set-ntp true
+  timedatectl set-ntp true
 
 #+end_src
 
@@ -36,9 +36,10 @@ The following filesystem configuration is a reference, which is simple and suffi
 - partition 3 is for Linux x86-64 root (/): Code is =8304= and remaining disk space is allocated for this partition
 
 #+begin_src shell
-fdisk -l
 
-gdisk /dev/nvme0n1
+  fdisk -l
+
+  gdisk /dev/nvme0n1
 
 #+end_src
 
@@ -46,14 +47,14 @@ After disk is partitioned via gdisk, run the following to format disk partitions
 
 #+begin_src shell
 
-mkfs.ext4 /dev/nvme0n1p3
-mkfs.fat -F32 /dev/nvme0n1p1
-mkswap /dev/nvme0n1p2
+  mkfs.ext4 /dev/nvme0n1p3
+  mkfs.fat -F32 /dev/nvme0n1p1
+  mkswap /dev/nvme0n1p2
 
-mount /dev/nvme0n1p3 /mnt
-mkdir /mnt/efi
-mount /dev/nvme0n1p1 /mnt/efi
-swapon /dev/nvme0n1p2
+  mount /dev/nvme0n1p3 /mnt
+  mkdir /mnt/efi
+  mount /dev/nvme0n1p1 /mnt/efi
+  swapon /dev/nvme0n1p2
 
 #+end_src
 
@@ -69,61 +70,61 @@ A quite number of  packages need to be installed during linux installation via p
 
 #+begin_src shell
 
-pacstrap /mnt base linux linux-firmware wpa_supplicant dhcpcd emacs grub efibootmgr amd-ucode
+  pacstrap /mnt base linux linux-firmware wpa_supplicant dhcpcd emacs grub efibootmgr amd-ucode
 
-genfstab -U /mnt >> /mnt/etc/fstab
+  genfstab -U /mnt >> /mnt/etc/fstab
 
-arch-chroot /mnt
+  arch-chroot /mnt
 
-ln -sf /usr/share/zoneinfo/US/Pacific /etc/localtime
+  ln -sf /usr/share/zoneinfo/US/Pacific /etc/localtime
 
-hwclock --systohc
+  hwclock --systohc
 
-# Edit /etc/locale.gen and uncomment en_US.UTF-8 UTF-8.
-locale-gen
+  # Edit /etc/locale.gen and uncomment en_US.UTF-8 UTF-8.
+  locale-gen
 
-echo LANG=en_US.UTF-8 > /etc/locale.conf
+  echo LANG=en_US.UTF-8 > /etc/locale.conf
 
-echo "KEYMAP=emacs" > /etc/vconsole.conf
+  echo "KEYMAP=emacs" > /etc/vconsole.conf
 
-echo olympus > /etc/hostname
+  echo olympus > /etc/hostname
 
-echo "127.0.0.1	localhost" >> /etc/hosts
-echo "::1		localhost" >> /etc/hosts
-echo "127.0.1.1	olympus.localdomain	olympus" >> /etc/hosts
+  echo "127.0.0.1	localhost" >> /etc/hosts
+  echo "::1		localhost" >> /etc/hosts
+  echo "127.0.1.1	olympus.localdomain	olympus" >> /etc/hosts
 
-passwd
+  passwd
 
-mkdir /efi/EFI
+  mkdir /efi/EFI
 
-# run the following to identify the graphic card
-lspci -v | grep -A1 -e VGA -e 3D
+  # run the following to identify the graphic card
+  lspci -v | grep -A1 -e VGA -e 3D
 
-# run the following to get a complete list of open-source video drivers
-pacman -Ss xf86-video
+  # run the following to get a complete list of open-source video drivers
+  pacman -Ss xf86-video
 
-# Since the installed CPU is amd 4750g, install xf86-video-amdgpu
-pacman -S xf86-video-amdgpu
+  # Since the installed CPU is amd 4750g, install xf86-video-amdgpu
+  pacman -S xf86-video-amdgpu
 
-# modify /etc/mkinitcpio.conf
-# add amdgpu in MODULES array
-# add resume hook in HOOKS array; right before fsck hook
+  # modify /etc/mkinitcpio.conf
+  # add amdgpu in MODULES array
+  # add resume hook in HOOKS array; right before fsck hook
 
-grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB
+  grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB
 
-# modify /etc/default/grub
-# add resume=/dev/nvme0n1p2 in GRUB_CMDLINE_LINUX_DEFAULT; here /dev/nvme0n1p2 should be swap partition
-# Note resume=/dev/nvme0n1p2 is to enable hibernate
+  # modify /etc/default/grub
+  # add resume=/dev/nvme0n1p2 in GRUB_CMDLINE_LINUX_DEFAULT; here /dev/nvme0n1p2 should be swap partition
+  # Note resume=/dev/nvme0n1p2 is to enable hibernate
 
-# Then, run the following to create grub.cfg
-grub-mkconfig -o /boot/grub/grub.cfg
+  # Then, run the following to create grub.cfg
+  grub-mkconfig -o /boot/grub/grub.cfg
 
-exit
+  exit
 
-umount -R /mnt
+  umount -R /mnt
 
-# Remove installation media (e.g., usb)
-reboot
+  # Remove installation media (e.g., usb)
+  reboot
 
 #+end_src
 
@@ -135,23 +136,38 @@ To start post-installation configuration, log into the system as root.
 
 #+begin_src shell
 
-pacman -S sudo man man-pages
-pacman -S --needed base-devel
+  pacman -S sudo man man-pages
+  pacman -S --needed base-devel
 
-ip link
+  ip link
 
-wpa_passphrase *SSID* *passprhase* > /etc/wpa_supplicant/wpa_supplicant-wlp2s0.conf
+  wpa_passphrase *SSID* *passprhase* > /etc/wpa_supplicant/wpa_supplicant-wlp2s0.conf
 
-ln -s /usr/share/dhcpcd/hooks/10-wpa_supplicant /usr/lib/dhcpcd/dhcpcd-hooks/
+  ln -s /usr/share/dhcpcd/hooks/10-wpa_supplicant /usr/lib/dhcpcd/dhcpcd-hooks/
 
-systemctl enable wpa_supplicant@wlp2s0
-systemctl start wpa_supplicant@wlp2s0
+  systemctl enable wpa_supplicant@wlp2s0
+  systemctl start wpa_supplicant@wlp2s0
 
-systemctl enable dhcpcd@wlp2s0
-systemctl start dhcpcd@wlp2s0
+  systemctl enable dhcpcd@wlp2s0
+  systemctl start dhcpcd@wlp2s0
 
-useradd -m mlee
-echo "mlee ALL=(ALL) ALL" > /etc/sudoers.d/mlee
+  useradd -m mlee
+  echo "mlee ALL=(ALL) ALL" > /etc/sudoers.d/mlee
+
+#+end_src
+
+** yay: AUR package manager
+
+#+begin_src shell
+
+  # install yay from AUR so that AUR packages can be managed by using yay
+  mkdir -P aur
+  pushd aur
+  git clone https://aur.archlinux.org/yay.git
+  pushd yay
+  makepkg -si
+  popd
+  popd
 
 #+end_src
 
@@ -159,48 +175,38 @@ echo "mlee ALL=(ALL) ALL" > /etc/sudoers.d/mlee
 
 #+begin_src shell
 
-pacman -S xorg-server xorg-server-xephyr
-pacman -S lightdm lightdm-webkit2-greeter lightdm-webkit-theme-litarvan
+  pacman -S xorg-server xorg-server-xephyr
+  pacman -S lightdm lightdm-webkit2-greeter lightdm-webkit-theme-litarvan
 
-# do not install gdm since lightdm is the dm that is going to be used
-pacman -S gnome gnome-tweaks
+  # do not install gdm since lightdm is the dm that is going to be used
+  pacman -S gnome gnome-tweaks
 
-# install tilda (a drop-down terminal emulator in X)
-pacman -S tilda
+  # install tilda (a drop-down terminal emulator in X)
+  pacman -S tilda
 
-# install numix-circle icon theme from AUR; change the icon theme from gnome tweaks
-# first, install numix-icon-theme-git
-pushd /tmp
-git clone https://aur.archlinux.org/numix-icon-theme-git.git 
-pushd numix-icon-theme-git
-makepkg -si
-popd
+  # install numix-circle icon theme from AUR; change the icon theme from gnome tweaks
+  yay -S numix-icon-theme-git
 
-# then, install numix-circle-icon-theme-git
-git clone https://aur.archlinux.org/numix-circle-icon-theme-git.git 
-pushd numix-circle-icon-theme-git
-makepkg -si
-popd
+  # then, install numix-circle-icon-theme-git
+  yay -S numix-circle-icon-theme-git
 
-popd
+  # edit /etc/lightdm/lightdm.conf and set lightdm-webkit2-greeter as greeter
+  # edit /etc/lightdm/lightdm-webkit2-greeter.conf and set theme or webkit-theme to litarvan
 
-# edit /etc/lightdm/lightdm.conf and set lightdm-webkit2-greeter as greeter
-# edit /etc/lightdm/lightdm-webkit2-greeter.conf and set theme or webkit-theme to litarvan
+  # This is to swap ctrl key and caps key globally in gnome DE
+  gsettings set org.gnome.desktop.input-sources xkb-options '["ctrl:swapcaps"]'
 
-# This is to swap ctrl key and caps key globally in gnome DE
-gsettings set org.gnome.desktop.input-sources xkb-options '["ctrl:swapcaps"]'
+  # Run the following to test lightdm before enabling it via systemd
+  lightdm --test-mode --debug
 
-# Run the following to test lightdm before enabling it via systemd
-lightdm --test-mode --debug
+  systemctl enable lightdm
 
-systemctl enable lightdm
+  # enable/start bluetooth
+  systemctl enable bluetooth
+  systemctl start bluetooth
 
-# enable/start bluetooth
-systemctl enable bluetooth
-systemctl start bluetooth
-
-# reboot the system to run display manager
-reboot
+  # reboot the system to run display manager
+  reboot
 
 #+end_src
 
