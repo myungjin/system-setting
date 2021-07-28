@@ -11,10 +11,23 @@ function install_packages {
 
     sudo apt update
 
-    sudo apt install -y build-essential erlang libsnappy-dev libssl-dev \
-	 net-tools python3-pip python3-matplotlib python3-testresources
+    sudo apt install -y build-essential \
+                        erlang \
+                        libsnappy-dev \
+                        libssl-dev \
+                        net-tools \
+                        python3-pip \
+                        python3-matplotlib \
+                        python3-testresources
 
     sudo apt clean
+
+    # go installation
+    GOLANG_PKG=go1.16.6.linux-amd64.tar.gz
+    wget https://golang.org/dl/$GOLANG_PKG
+    sudo tar -C /usr/local/ -xzf $GOLANG_PKG
+    rm -f $GOLANG_PKG
+    echo 'export PATH=$PATH:/usr/local/go/bin' >> /home/vagrant/.bashrc
 }
 
 function install_ml_libraries {
@@ -25,8 +38,12 @@ function install_ml_libraries {
     $PIP3 install torch==1.8.0+cpu torchvision==0.9.0+cpu torchaudio==0.8.0 \
 	  -f https://download.pytorch.org/whl/torch_stable.html
 
-    $PIP3 install tensorflow
-    $PIP3 install keras
+    $PIP3 install cloudpickle \
+                  paho-mqtt \
+                  keras \
+                  setuptools \
+                  tensorflow \
+                  wheel
 
     $PIP3 cache purge
 }
