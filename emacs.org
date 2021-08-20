@@ -421,7 +421,17 @@ characters that you can control.
 
 #+end_src
 
-*** IDE featuer: YAML mode
+*** IDE feature: flycheck
+#+begin_src emacs-lisp
+
+  (use-package flycheck
+    :ensure t
+    :init (global-flycheck-mode)
+    :config
+    (add-hook 'after-init-hook #'global-flycheck-mode))
+  #+end_src
+  
+*** IDE feature: YAML mode
 #+begin_src emacs-lisp
 
   (use-package yaml-mode)
