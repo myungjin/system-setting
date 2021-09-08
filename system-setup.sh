@@ -44,7 +44,7 @@ function config_macos {
     brew install --cask font-cantarell
 
     # install python packages
-    pip install python-language-server[all]
+    pip install python-lsp-server[all]
     pip install pyls-black pyls-isort pyls-mypy
     pip install future
     pip install autopep8
