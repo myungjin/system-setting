@@ -96,10 +96,10 @@ This section configures the basic UI settings for Emacs.
 *** Font configuration
 #+begin_src emacs-lisp
 
-  (set-face-attribute 'default nil :font "Fira Code Retina" :height mlee/default-font-size)
+  (set-face-attribute 'default nil :font "Fira Code" :height mlee/default-font-size)
 
   ;; Set the fixed pitch face
-  (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height mlee/default-font-size)
+  (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height mlee/default-font-size)
 
   ;; Set the variable pitch face
   (set-face-attribute 'variable-pitch nil :font "Cantarell" :height mlee/default-variable-font-size :weight 'regular)
@@ -723,5 +723,12 @@ implements highlighting changes on the fly. This requires Emacs 24.4 or newer.
 #+begin_src emacs-lisp
 
   (electric-pair-mode 1)
+
+#+end_src
+
+*** Protobuf mode
+#+begin_src emacs-lisp
+
+  (use-package protobuf-mode)
 
 #+end_src
