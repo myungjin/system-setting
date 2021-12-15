@@ -26,8 +26,8 @@ function config_linux {
 function config_macos {
     brew install go gopls
     brew install pyenv
-    pyenv install 3.9.1
-    pyenv global 3.9.1
+    pyenv install 3.9.6
+    pyenv global 3.9.6
     pyenv version
 
     eval "$(pyenv init -)"
