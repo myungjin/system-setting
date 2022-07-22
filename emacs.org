@@ -104,8 +104,13 @@ This section configures the basic UI settings for Emacs.
   ;; Set the variable pitch face
   (set-face-attribute 'variable-pitch nil :font "Cantarell" :height mlee/default-variable-font-size :weight 'regular)
 
-  #+end_src
+#+end_src
 
+*** Minor mode for Fira Code ligatures
+#+begin_src emacs-lisp
+  (use-package fira-code-mode
+  :config (global-fira-code-mode))
+#+end_src
 
 ** Advanced UI configuration
 *** Color Theme

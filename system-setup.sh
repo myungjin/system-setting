@@ -24,6 +24,7 @@ function config_linux {
 }
 
 function config_macos {
+    brew install gnupg
     brew install go gopls
     brew install pyenv
     pyenv install 3.9.6
