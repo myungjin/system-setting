@@ -91,6 +91,19 @@ This section configures the basic UI settings for Emacs.
                   treemacs-mode-hook))
     (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
+  ;; set 150 characters as fill column
+  (add-hook 'text-mode-hook (lambda () (set-fill-column 150)))
+
+  ;; disable tab
+  (setq-default indent-tabs-mode nil)
+
+#+end_src
+
+*** JSON mode indentation hook
+#+begin_src emacs-lisp
+
+  (use-package json-mode)
+
 #+end_src
 
 *** Font configuration
