@@ -99,10 +99,13 @@ This section configures the basic UI settings for Emacs.
 
 #+end_src
 
-*** JSON mode indentation hook
+*** JSON  indentation hook
 #+begin_src emacs-lisp
 
-  (use-package json-mode)
+  (add-hook 'json-mode-hook
+          (lambda ()
+            (make-local-variable 'js-indent-level)
+            (setq js-indent-level 4)))
 
 #+end_src
 
