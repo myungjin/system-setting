@@ -3,6 +3,9 @@
 function config_linux {
     sudo pacman -S ttf-fira-code cantarell-fonts ccls python-pip
 
+    # install golang language server
+    sudo pacman -S gopls
+
     # install python packages
     sudo pacman -S python-language-server
     sudo pacman -S python-pyls-black
