@@ -7,6 +7,16 @@ function rmbak {
     done
 }
 
+function addsudo {
+    username=$1
+    exists=`id $username`
+    if [[ -z $exists ]]; then
+         return
+    fi
+
+    echo "$username ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/$username
+}
+
 function parse_git_branch {
     git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
 }
