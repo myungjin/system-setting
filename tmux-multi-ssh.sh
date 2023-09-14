@@ -27,7 +27,7 @@ starttmux() {
     local hosts=( $HOSTS )
 
     # tmux new-window "ssh ${hosts[0]}"
-    # unset hosts[0];
+    unset hosts[0];
     for host in "${hosts[@]}"; do
         for i in $(seq 1 $n_copies); do
             tmux split-window -h "ssh $host"
