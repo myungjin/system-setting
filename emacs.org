@@ -737,3 +737,16 @@ implements highlighting changes on the fly. This requires Emacs 24.4 or newer.
   (use-package protobuf-mode)
 
 #+end_src
+
+*** dired-rsync
+source: https://github.com/stsquad/dired-rsync
+This package allows for copying files/directories from local host to remote host (vice-versa).
+This will be useful to do remote testing during development.
+
+#+begin_src emacs-lisp
+
+  (use-package dired-rsync
+    :bind (:map dired-mode-map
+                ("C-c C-r" . dired-rsync)))
+
+#+end_src
