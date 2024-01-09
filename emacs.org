@@ -760,6 +760,9 @@ $ brew install rsync
     :after dired
     :bind (:map dired-mode-map
                 ("C-c C-r" . dired-rsync))
-    :config (add-to-list 'mode-line-misc-info '(:eval dired-rsync-modeline-status 'append)))
+    :config
+    (add-to-list 'mode-line-misc-info '(:eval dired-rsync-modeline-status 'append))
+    ;; (setq dired-rsync-options "-az --info=progress2 --delete")
+  )
 
 #+end_src
