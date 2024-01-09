@@ -743,10 +743,23 @@ source: https://github.com/stsquad/dired-rsync
 This package allows for copying files/directories from local host to remote host (vice-versa).
 This will be useful to do remote testing during development.
 
-#+begin_src emacs-lisp
+For remote copy (i.e., after running dired-rsync), an example syntax to specify a remote destination is as follows:
+#+begin_example
+/ssh:[user@]<hostname>:~/
+#+end_example
 
+Note: rsync must be installed both source and destination machines.
+Note: Mac OS has an old rsync version. To use --info=progress2 argument, a new version is needed. Install a new version by using brew.
+#+begin_example
+$ brew install rsync
+#+end_example
+
+#+begin_src emacs-lisp
   (use-package dired-rsync
+    :demand t
+    :after dired
     :bind (:map dired-mode-map
-                ("C-c C-r" . dired-rsync)))
+                ("C-c C-r" . dired-rsync))
+    :config (add-to-list 'mode-line-misc-info '(:eval dired-rsync-modeline-status 'append)))
 
 #+end_src
