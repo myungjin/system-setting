@@ -123,6 +123,8 @@ This section configures the basic UI settings for Emacs.
 #+end_src
 
 *** Minor mode for Fira Code ligatures
+Run =M-x fira-code-mode-install-fonts= to install the fonts.
+
 #+begin_src emacs-lisp
   (use-package fira-code-mode
   :config (global-fira-code-mode))
