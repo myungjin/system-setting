@@ -3,6 +3,9 @@
 
 # This is for ubuntu 22.04
 
+# references: https://medium.com/repro-repo/build-pytorch-from-source-with-cuda-12-2-1-with-ubuntu-22-04-b5b384b47ac
+#             https://github.com/pytorch/pytorch/tree/v2.2.0?tab=readme-ov-file#install-pytorch
+
 # install conda
 curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 
@@ -39,7 +42,10 @@ conda activate $conda_env_name
 
 conda install cmake ninja
 conda install mkl mkl-include
-conda install -c pytorch magma-cuda122
+
+# doesn't seem necessary; magma-cuda122 doesn't exist in conda in pytorch channel,
+# so we have to build it from the source if we want to use it.
+# conda install -c pytorch magma-cuda122
 
 # clone pytorch repo
 git clone --recursive https://github.com/pytorch/pytorch
@@ -51,6 +57,12 @@ git submodule update --init --recursive
 # install requirements
 pip install -r requirements.txt
 
+
+# some additional configuration
+ln -sf /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /home/myungjle/miniconda3/lib/libstdc++.so.6
+
 # start build
 export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
-python setup.py develop
+export _GLIBCXX_USE_CXX11_ABI=1
+USE_CUDA=1 python setup.py develop
+# python setup.py develop
