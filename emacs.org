@@ -110,6 +110,8 @@ This section configures the basic UI settings for Emacs.
 #+end_src
 
 *** Font configuration
+Install Fira Code and Cantarell fonts. For Ubuntu, run =sudo apt install fonts-firacode fonts-cantarell=.
+
 #+begin_src emacs-lisp
 
   (set-face-attribute 'default nil :font "Fira Code" :height mlee/default-font-size)
@@ -127,7 +129,10 @@ Run =M-x fira-code-mode-install-fonts= to install the fonts.
 
 #+begin_src emacs-lisp
   (use-package fira-code-mode
-  :config (global-fira-code-mode))
+  :config
+  (global-fira-code-mode)
+  (fira-code-mode-set-font)
+  )
 #+end_src
 
 ** Advanced UI configuration
