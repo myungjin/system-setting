@@ -30,29 +30,41 @@ function config_ubuntu {
 }
 
 function config_archlinux {
-    sudo pacman -S ttf-fira-code cantarell-fonts ccls python-pip
+    sudo pacman -S -y --needed gimp
+    sudo pacman -S -y --needed ttf-fira-code cantarell-fonts ccls python-pip
 
+    sudo pacman -S -y pyenv
+    
     # install golang language server
-    sudo pacman -S gopls
+    sudo pacman -S -y --needed gopls
 
     # install python packages
-    sudo pacman -S python-language-server
-    sudo pacman -S python-pyls-black
+    sudo pacman -S -y --needed python-language-server
+    sudo pacman -S -y --needed python-pyls-black
     # sudo pacman -S pyls-black pyls-isort pyls-mypy
 
-    sudo pacman -S python-mccabe
-    sudo pacman -S python-rope
-    sudo pacman -S python-pyflakes
-    sudo pacman -S flake8
-    sudo pacman -S python-pycodestyle
-    sudo pacman -S python-pylint
-    sudo pacman -S yapf
-    sudo pacman -S python-pydocstyle
+    sudo pacman -S -y --needed python-mccabe
+    sudo pacman -S -y --needed python-rope
+    sudo pacman -S -y --needed python-pyflakes
+    sudo pacman -S -y --needed flake8
+    sudo pacman -S -y --needed python-pycodestyle
+    sudo pacman -S -y --needed python-pylint
+    sudo pacman -S -y --needed yapf
+    sudo pacman -S -y --needed python-pydocstyle
 
-    sudo pacman -S python-future
-    sudo pacman -S python-isort
-    sudo pacman -S python-ruamel-yaml
-    sudo pacman -S python-numpy
+    sudo pacman -S -y --needed python-future
+    sudo pacman -S -y --needed python-isort
+    sudo pacman -S -y --needed python-ruamel-yaml
+    sudo pacman -S -y --needed python-numpy
+
+    if grep "PYENV_ROOT" ~/.bashrc; then
+        echo "pyenv is already configured"
+    else
+        echo >> ~/.bashrc
+        echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+        echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+        echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n eval "$(pyenv init -)"\nfi' >> ~/.bashrc
+    fi
 }
 
 function config_macos {
@@ -97,7 +109,7 @@ function main {
         distribution=$(lsb_release -i)
         if [[ $distribution == *"Ubuntu"* ]]; then
             config_ubuntu
-        elif [[ $distribution == *"archlinux"* ]]; then
+        elif [[ $distribution == *"Arch"* ]]; then
             config_archlinux
         else
             echo "$distribution not supported"

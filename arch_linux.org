@@ -3,8 +3,6 @@
 #+EMAIL: myungjin.lee@gmail.com
 #+PROPERTY: header-args:shell
 
-The following Arch Linux installation and configuration is tailored for Asrock DeskMini X300 mini with AMD RyZen 4750g APU.
-
 * Pre-requisites
 An arch linux image needs to be downloaded. The downloaded image  needs to be burned into a bootable medium (e.g., usb stick).
 
@@ -73,7 +71,7 @@ A number of  packages need to be installed during linux installation via pacstra
 
 #+begin_src shell
 
-  pacstrap /mnt base linux linux-firmware wpa_supplicant dhcpcd emacs nano grub efibootmgr amd-ucode
+  pacstrap /mnt base linux linux-firmware wpa_supplicant dhcpcd emacs nano grub efibootmgr glibc-locales amd-ucode
 
   genfstab -U /mnt >> /mnt/etc/fstab
 
@@ -83,7 +81,7 @@ A number of  packages need to be installed during linux installation via pacstra
 
   hwclock --systohc
 
-  # Edit /etc/locale.gen and uncomment en_US.UTF-8 UTF-8.
+  # Edit /etc/locale.gen and uncomment en_US.UTF-8 UTF-8 and ko_KR.UTF-8 UTF-8.
   nano /etc/locale.gen
   locale-gen
 
@@ -200,11 +198,14 @@ From now on, do the following configurations within a user account. =sudo= may b
 6. (only for xorg, not for wayland) sudo nvidia-xconfig
 
 ** GNOME and wayland
-1. sudo pacman -S gnome gnome-tweaks
+1. =sudo pacman -S gnome gnome-tweaks=
 
-2. sudo systemctl enable gdm
+2. =sudo systemctl enable gdm=
 
-3. reboot
+3. To swap ctrl key and caps key globally in gnome DE, 
+    =gsettings set org.gnome.desktop.input-sources xkb-options '["ctrl:swapcaps"]'=
+
+4. =reboot=
 
 ** x-window and lightDM
 
@@ -232,14 +233,23 @@ From now on, do the following configurations within a user account. =sudo= may b
 
 #+end_src
 
-* Useful configurations
+* Bluetooth
 #+begin_src shell
-  # install tilda (a drop-down terminal emulator in X)
-  pacman -S tilda
-
   # enable/start bluetooth
   systemctl enable bluetooth
   systemctl start bluetooth
+#+end_src
+
+* Useful packages
+#+begin_src shell
+  # tilda: a drop-down terminal emulator in X
+  # lsb_release: print LSB (Linux Standard Base) and Distribution information
+  # firefox: web browser
+  # tk: somehow needed to install python3 successfully under pyenv
+  sudo pacman -S -y tilda lsb-release firefox tk
+
+  # install google chrome (web broswer)
+  yay -S -y google-chrome
 
   # install numix-circle icon theme from AUR; change the icon theme from gnome tweaks
   yay -S numix-icon-theme-git
@@ -247,6 +257,51 @@ From now on, do the following configurations within a user account. =sudo= may b
   # then, install numix-circle-icon-theme-git
   yay -S numix-circle-icon-theme-git
 #+end_src
+
+* Korean Language Environment
+1. You should have =ko_KR.UTF-8= enabled in =/etc/locale.gen=.
+   
+2. Install Korean font so that  korean letters are properly displayed (e.g., on a web broswer): =sudo pacman -S noto-fonts-cjk=.
+
+3. Install input method: =sudo pacman -S fcitx5-hangul fcitx5-im=.
+
+4. run =fcitx5-configtool=.
+   (a) Select Add Input Method -> Deselect "Show Only Current Language" and add Hangul.
+   (b) (Optional) Select Global Options. At Trigger Input Method, change =Ctrl+Space= to =Alt+Space=.
+          In case of Gnome, we should disable activate-window-menu key binding.
+          =gsettings set org.gnome.desktop.wm.keybindings activate-window-menu []=
+          To restore default, =gsettings reset org.gnome.desktop.wm.keybindings activate-window-menu=
+          To see the current setting, =gsettings list-recursively | grep activate-window-menu=
+
+5. add the following to =/etc/environment= for Fcitx5 to work across almost all apps:
+#+begin_src
+GTK_IM_MODULE=fcitx
+QT_IM_MODULE=fcitx
+XMODIFIERS=@im=fcitx
+#+end_src
+6. To see if Fcitx5 is working correctly, open an application and press, =Ctrl+Space= (or =Alt+Space=) to switch between input methods.
+
+* Making MAC OS look and feel
+1. sudo pacman -S gnome-shell-extensions
+
+2. yay -S gnome-shell-extension-dash-to-dock gnome-shell-extension-freon
+
+3. Download icons from https://gnome-look.org (e.g., https://www.gnome-look.org/p/1400021).
+   
+4. Unzip the file: e.g., =tar -xf  Mkos-Big-Sur.tar.xz=.
+
+5. Place Icons to =/usr/share/icons= (as root) or =${HOME}/.local/share/icons= (as user); create icons folder if not exists.
+
+6. Run =gnome-tweaks=. Go to Appearance->Icons and select icons you want.
+   
+7. Restore minimize,maximize,close icons on application:
+     =gsettings set org.gnome.desktop.wm.preferences button-layout "appmenu:minimize,maximize,close"=
+
+8. To customize GDM, install =gdm-settings=: =yay -S gdm-settings=.  Note: this needs python in the system. If pyenv is in use, run =pyenv shell system=.
+
+9. Select GDM settings from Gnome application UI. Go to Appearance->Background. Choose "Image" as Type and select a background image
+   you want. Litarvan background image can be downloaded from https://github.com/Litarvan/lightdm-webkit-theme-litarvan/blob/master/src/assets/images/background.png?raw=true.
+
 * ETC
 ** Bluetooth headset
 Bluetooth and headset can be set up in gnome desktop environment.
