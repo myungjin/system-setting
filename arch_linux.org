@@ -31,9 +31,10 @@ This step is for configuring wireless interface so that necessary packages can b
 
 ** Filesystem configuration
 The following filesystem configuration is a reference, which is simple and sufficient for most desktop users:
-- partition 1 is for EFI system partition: Code should be specified as  =EF00= and  size is =512MB=.
-- partition 2 is for Linux swap: Code is =8200= and size is =64GB= (2x memory size)
-- partition 3 is for Linux x86-64 root (/): Code is =8304= and remaining disk space is allocated for this partition
+- partition 1 is for EFI system partition: Code should be specified as  =EF00= and  size is =1GB=.
+- partition 2 is for Linux swap: Code is =8200= and size is =10GB=
+- partition 3 is for Linux x86-64 root (/): Code is =8304= and allocate 200GB
+- partition 4 is for Linux home (/home): Code is =8302= and allocate remaining disk space for this partition
 
 #+begin_src shell
 
@@ -52,25 +53,27 @@ After disk is partitioned via gdisk, run the following to format disk partitions
   mkswap /dev/nvme0n1p2
 
   mount /dev/nvme0n1p3 /mnt
-  mkdir /mnt/efi
-  mount /dev/nvme0n1p1 /mnt/efi
+  mount --mkdir /dev/nvme0n1p1 /mnt/boot
+  mount --mkdir /dev/nvme0n1p4 /mnt/home
   swapon /dev/nvme0n1p2
 
 #+end_src
 
-A quite number of  packages need to be installed during linux installation via pacstrap:
+A number of  packages need to be installed during linux installation via pacstrap:
 - linux
 - linux-firmware
 - wpa_supplicant
 - dhcpcd
 - emacs
+- nano
 - grub
 - efibootmgr
+- sudo
 - amd-ucode
 
 #+begin_src shell
 
-  pacstrap /mnt base linux linux-firmware wpa_supplicant dhcpcd emacs grub efibootmgr amd-ucode
+  pacstrap /mnt base linux linux-firmware wpa_supplicant dhcpcd emacs nano grub efibootmgr amd-ucode
 
   genfstab -U /mnt >> /mnt/etc/fstab
 
@@ -81,6 +84,7 @@ A quite number of  packages need to be installed during linux installation via p
   hwclock --systohc
 
   # Edit /etc/locale.gen and uncomment en_US.UTF-8 UTF-8.
+  nano /etc/locale.gen
   locale-gen
 
   echo LANG=en_US.UTF-8 > /etc/locale.conf
@@ -95,24 +99,11 @@ A quite number of  packages need to be installed during linux installation via p
 
   passwd
 
-  mkdir /efi/EFI
-
-  # run the following to identify the graphic card
-  lspci -v | grep -A1 -e VGA -e 3D
-
-  # run the following to get a complete list of open-source video drivers
-  pacman -Ss xf86-video
-
-  # Since the installed CPU is amd 4750g, install xf86-video-amdgpu
-  pacman -S xf86-video-amdgpu
-
-  # modify /etc/mkinitcpio.conf
-  # add amdgpu in MODULES array
-  # add resume hook in HOOKS array; right before fsck hook
-
-  grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB
+  mkdir /boot/EFI
+  grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
 
   # modify /etc/default/grub
+  nano /etc/default/grub
   # add resume=/dev/nvme0n1p2 in GRUB_CMDLINE_LINUX_DEFAULT; here /dev/nvme0n1p2 should be swap partition
   # Note resume=/dev/nvme0n1p2 is to enable hibernate
 
@@ -132,16 +123,24 @@ A quite number of  packages need to be installed during linux installation via p
 
 To start post-installation configuration, log into the system as root.
 
+** Add user
+#+begin_src shell
+  # Replace <id>  with a user account
+  useradd -m <id>
+  echo "<id> ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/<id>
+  passwd <id>
+#+end_src
+
+From now on, do the following configurations within a user account. =sudo= may be needed.
+
 ** permanent wireless interface setup
 
 #+begin_src shell
-
-  pacman -S sudo man man-pages
-  pacman -S --needed base-devel
-
   ip link
 
   wpa_passphrase *SSID* *passprhase* > /etc/wpa_supplicant/wpa_supplicant-wlp2s0.conf
+  # remove plain passphrase in the config file
+  nano /etc/wpa_supplicant/wpa_supplicant-wlp2s0.conf
 
   ln -s /usr/share/dhcpcd/hooks/10-wpa_supplicant /usr/lib/dhcpcd/dhcpcd-hooks/
 
@@ -151,14 +150,13 @@ To start post-installation configuration, log into the system as root.
   systemctl enable dhcpcd@wlp2s0
   systemctl start dhcpcd@wlp2s0
 
-  useradd -m mlee
-  echo "mlee ALL=(ALL) ALL" > /etc/sudoers.d/mlee
-
 #+end_src
 
 ** yay: AUR package manager
 
 #+begin_src shell
+  pacman -S man man-pages
+  pacman -S --needed base-devel
 
   # install yay from AUR so that AUR packages can be managed by using yay
   mkdir -P aur
@@ -171,7 +169,44 @@ To start post-installation configuration, log into the system as root.
 
 #+end_src
 
-** x-window
+** AMD GPU
+  # run the following to identify the graphic card
+  lspci -v | grep -A1 -e VGA -e 3D
+
+  # run the following to get a complete list of open-source video drivers
+  pacman -Ss xf86-video
+
+  # Since the installed CPU is amd 4750g, install xf86-video-amdgpu
+  pacman -S xf86-video-amdgpu
+
+  # modify /etc/mkinitcpio.conf
+  # add amdgpu in MODULES array
+  # add resume hook in HOOKS array; right before fsck hook
+
+** NVIDIA 4070 TI GPU
+1. lspci -k | grep -A 2 -E "(VGA|3D)"
+   
+2. pacman -S nvidia
+
+3. Remove =kms= from the HOOKS array in /etc/mkinitcpio.conf and [[https://wiki.archlinux.org/title/Regenerate_the_initramfs][regenerate the initramfs]]. This will prevent the initramfs from containing the nouveau module making sure the kernel cannot load it during early boot.
+   sudo nano /etc/mkinitcpio.conf
+   
+4. To regenerate the initramfs,
+   sudo mkinitcpio -p linux
+
+5. reboot
+
+# This step is necessary only for xorg.
+6. (only for xorg, not for wayland) sudo nvidia-xconfig
+
+** GNOME and wayland
+1. sudo pacman -S gnome gnome-tweaks
+
+2. sudo systemctl enable gdm
+
+3. reboot
+
+** x-window and lightDM
 
 #+begin_src shell
 
@@ -180,15 +215,6 @@ To start post-installation configuration, log into the system as root.
 
   # do not install gdm since lightdm is the dm that is going to be used
   pacman -S gnome gnome-tweaks
-
-  # install tilda (a drop-down terminal emulator in X)
-  pacman -S tilda
-
-  # install numix-circle icon theme from AUR; change the icon theme from gnome tweaks
-  yay -S numix-icon-theme-git
-
-  # then, install numix-circle-icon-theme-git
-  yay -S numix-circle-icon-theme-git
 
   # edit /etc/lightdm/lightdm.conf and set lightdm-webkit2-greeter as greeter
   # edit /etc/lightdm/lightdm-webkit2-greeter.conf and set theme or webkit-theme to litarvan
@@ -201,15 +227,26 @@ To start post-installation configuration, log into the system as root.
 
   systemctl enable lightdm
 
-  # enable/start bluetooth
-  systemctl enable bluetooth
-  systemctl start bluetooth
-
   # reboot the system to run display manager
   reboot
 
 #+end_src
 
+* Useful configurations
+#+begin_src shell
+  # install tilda (a drop-down terminal emulator in X)
+  pacman -S tilda
+
+  # enable/start bluetooth
+  systemctl enable bluetooth
+  systemctl start bluetooth
+
+  # install numix-circle icon theme from AUR; change the icon theme from gnome tweaks
+  yay -S numix-icon-theme-git
+
+  # then, install numix-circle-icon-theme-git
+  yay -S numix-circle-icon-theme-git
+#+end_src
 * ETC
 ** Bluetooth headset
 Bluetooth and headset can be set up in gnome desktop environment.
