@@ -155,11 +155,11 @@ From now on, do the following configurations within a user account. =sudo= may b
 ** yay: AUR package manager
 
 #+begin_src shell
-  pacman -S man man-pages
-  pacman -S --needed base-devel
+  sudo pacman -S man man-pages
+  sudo pacman -S --needed base-devel git
 
   # install yay from AUR so that AUR packages can be managed by using yay
-  mkdir -P aur
+  mkdir -p aur
   pushd aur
   git clone https://aur.archlinux.org/yay.git
   pushd yay
