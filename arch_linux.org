@@ -150,12 +150,24 @@ From now on, do the following configurations within a user account. =sudo= may b
 
 #+end_src
 
+** Basic development setting
+#+begin_src shell
+  sudo pacman -S man man-pages
+  sudo pacman -S --needed base-devel git rust
+#+end_src
+
+** Install fan control tool for Lian Li fan
+#+begin_src shell
+  git clone git@github.com:EightB1ts/uni-sync.git
+  cd uni-sync
+  ./install.sh
+#+end_src
+The configuration file will be =/usr/sbin/uni-sync.json=. Edit speed between 1-100 (%).
+And restart the service: =sudo systemctl restart uni-sync=.
+
 ** yay: AUR package manager
 
 #+begin_src shell
-  sudo pacman -S man man-pages
-  sudo pacman -S --needed base-devel git
-
   # install yay from AUR so that AUR packages can be managed by using yay
   mkdir -p aur
   pushd aur
@@ -164,7 +176,6 @@ From now on, do the following configurations within a user account. =sudo= may b
   makepkg -si
   popd
   popd
-
 #+end_src
 
 ** AMD GPU
@@ -233,7 +244,7 @@ From now on, do the following configurations within a user account. =sudo= may b
 
 #+end_src
 
-* Bluetooth
+** Bluetooth
 #+begin_src shell
   # enable/start bluetooth
   systemctl enable bluetooth
