@@ -28,11 +28,12 @@ sudo dpkg -i $cuda_keyring_file
 sudo apt update
 
 # nvidia-driver-550 has cuda-12.4 driver
+# nvidia-driver-535 has cuda-12.2 driver
 
 # install cuda-toolkit
-# sudo apt -y install cuda-toolkit
+sudo apt install cuda-toolkit-12-2
 # install cudnn
-# sudo apt-get -y install cudnn-cuda-12
+sudo apt-get install cudnn9-cuda-12
 
 # delete keyring file
 rm -f $cuda_keyring_file
@@ -42,14 +43,13 @@ conda_env_name=pytorch-src-build
 conda create -n $conda_env_name
 conda activate $conda_env_name
 
-conda install -c nvidia cuda-compiler=12.4.0
-conda install -c nvidia cuda-toolkit=12.4.0
-conda install -c nvidia cudnn=8.9.2.26
 conda install cmake ninja
-conda install intel::mkl-static intel::mkl-include
+conda install intel::mkl intel::mkl-static intel::mkl-include
 
 # so we have to build it from the source if we want to use it.
-conda install -c pytorch magma-cuda124  # or the magma-cuda* that matches your CUDA version from https://anaconda.org/pytorch/repo
+conda install -c pytorch magma-cuda121  # or the magma-cuda* that matches your CUDA version from https://anaconda.org/pytorch/repo
+
+conda install pyyaml
 
 # clone pytorch repo
 git clone --recursive https://github.com/pytorch/pytorch
@@ -66,7 +66,7 @@ pip install -r requirements.txt
 ln -sf /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /home/myungjle/miniconda3/lib/libstdc++.so.6
 
 # start build
-export CMAKE_CUDA_COMPILER=~/miniconda3/envs/pytorch-src-build/bin/nvcc
+export CMAKE_CUDA_COMPILER=/usr/local/cuda-12/bin/nvcc
 export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
 export _GLIBCXX_USE_CXX11_ABI=1
 USE_CUDA=1 python setup.py develop
