@@ -295,7 +295,8 @@ XMODIFIERS=@im=fcitx
 * Making MAC OS look and feel
 1. sudo pacman -S gnome-shell-extensions
 
-2. yay -S gnome-shell-extension-dash-to-dock gnome-shell-extension-freon
+2. To show CPU temperature on GNOME  sheel, yay -S gnome-shell-extension-dash-to-dock gnome-shell-extension-freon
+   
 
 3. Download icons from https://gnome-look.org (e.g., https://www.gnome-look.org/p/1400021).
    
@@ -319,3 +320,5 @@ Bluetooth and headset can be set up in gnome desktop environment.
 Once gnome is set up, connect bluetooth headset via gnome desktop interface.
 Once the headset is connected to the system, launch `Settings' application.
 Choose `Sound', and choose the headset in `Output Deivce' and a configuration relevant to the headset in `Configuration'
+
+
